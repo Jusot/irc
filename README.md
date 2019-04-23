@@ -1,2 +1,1 @@
-# npcp
-network programming course project
+# Network Programming Course Project
