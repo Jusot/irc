@@ -3,25 +3,34 @@
 ## Division of Work
 
 ### Luo Yuexuan
-+ [ ] Connection Registration
-+ [ ] PRIVMSG and NOTICE
++ [ ] ERR_UNKNOWN
 + [ ] PING and PONG
++ [ ] NAMES
++ [ ] LIST
++ [ ] WHO
 + [ ] MOTD
-+ [ ] LUSERS
-+ [ ] WHOIS
 
 ### Xu Bo
-+ [ ] ERR_UNKNOWN
++ [ ] Basic Connection
++ [ ] Connection Registration
 + [ ] Robustness
-+ [ ] JOIN
-+ [ ] PRIVMSG and NOTICE to channels
 + [ ] PART
++ [ ] AWAY
 + [ ] TOPIC
 
 ### Chen Yiyang
 + [ ] User and channel models
-+ [ ] AWAY
-+ [ ] NAMES
-+ [ ] LIST
-+ [ ] WHO
-+ [ ] Update NICK/QUIT/WHOIS/LUSERS
++ [ ] JOIN
++ [ ] PRIVMSG and NOTICE
++ [ ] NICK
++ [ ] QUIT
++ [ ] WHOIS
++ [ ] LUSERS
+
+## Details
+
+### Luo Yuexuan
+
+### Xu Bo
+
+### Chen Yiyang
