@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# For Editor
+.vs/
+.vscode/
+*.sln
+*.vcxproj*
+
+# Folders
+bin/
+obj/
