@@ -4,7 +4,14 @@
 #include <string>
 #include <unordered_map>
 
-class ConnectionPtr;
-extern std::unordered_map<std::string, ConnectionPtr> users;
+class TcpConnectionPtr;
+extern std::unordered_map<std::string, TcpConnectionPtr> users;
+
+/*
+void on_message(const TcpConnectionPtr &conn, Buffer *buf)
+{
+    
+}
+*/
 
 #endif // NPCP_USERS_HPP
