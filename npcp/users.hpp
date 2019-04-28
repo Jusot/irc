@@ -4,14 +4,13 @@
 #include <string>
 #include <unordered_map>
 
-class TcpConnectionPtr;
-extern std::unordered_map<std::string, TcpConnectionPtr> users;
+#include "../icarus/icarus/callbacks.hpp"
 
-/*
-void on_message(const TcpConnectionPtr &conn, Buffer *buf)
+namespace npcp
 {
-    
+extern std::unordered_map<std::string, icarus::TcpConnectionPtr> users;
+
+void on_message(const icarus::TcpConnectionPtr &conn, icarus::Buffer *buf /*, Timestamp*/);
 }
-*/
 
 #endif // NPCP_USERS_HPP
