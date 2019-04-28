@@ -4,4 +4,7 @@
 
 #include "channels.hpp"
 
+namespace npcp
+{
 std::unordered_map<std::string, std::vector<std::string>> channels;
+}

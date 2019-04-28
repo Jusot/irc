@@ -5,6 +5,10 @@
 #include <string>
 #include <unordered_map>
 
+namespace npcp
+{
 extern std::unordered_map<std::string, std::vector<std::string>> channels;
+}
+
 
 #endif // NPCP_CHANNELS_HPP
