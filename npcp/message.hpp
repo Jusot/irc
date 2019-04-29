@@ -13,19 +13,13 @@ public:
     ~Message() = default;
 
     std::string source() const;
-    std::string ins() const;
+    std::string command() const;
     std::vector<std::string> args() const;
 
 private:
     std::string source_;
-    std::string ins_;
+    std::string command_;
     std::vector<std::string> args_;
-};
-
-class Reply
-{
-public:
-    static std::string gen_reply(const std::vector<std::string>& args);
 };
 }
 

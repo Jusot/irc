@@ -26,7 +26,7 @@ Message::Message(std::string message)
     }
 
     end_pos = std::min(message.find(' ', pos), crlf_pos);
-    ins_ = message.substr(pos, end_pos - pos);
+    command_ = message.substr(pos, end_pos - pos);
     pos = end_pos + 1;
 
     while (pos < crlf_pos)
@@ -47,19 +47,12 @@ std::string Message::source() const
     return source_;
 }
 
-std::string Message::ins() const
+std::string Message::command() const
 {
-    return ins_;
+    return command_;
 }
 
 std::vector<std::string> Message::args() const
 {
     return args_;
-}
-
-std::string Reply::gen_reply(const std::vector<std::string> &args)
-{
-    std::string reply;
-    for (const auto &arg : args) reply += arg + ' ';
-    return reply + "\r\n";
 }
