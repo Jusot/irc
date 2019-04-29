@@ -5,11 +5,14 @@
 #include "message.hpp"
 #include "process.hpp"
 #include "../icarus/icarus/buffer.hpp"
+#include "../icarus/icarus/tcpconnection.hpp"
 
 using namespace icarus;
 
 namespace
 {
+static const std::string _hostname = ":jusot.com";
+
 constexpr std::size_t cal_hash(const char* str)
 {
     return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
@@ -57,32 +60,34 @@ void on_message(const TcpConnectionPtr& conn, Buffer* buf)
         _ins_user_process(conn, source, ins, args);
         break;
 
+#define RPL_WHEN_NOTREGISTERED if (!_check_registered(conn)) \ 
+        { \
+            conn->send(Reply::gen_reply({_hostname, \
+                "451", \
+                ":You have not registered"})); \
+            break; \
+        }   // 451 for ERR_NOTREGISTERED
+
     case "QUIT"_hash:
-        if (!_check_registered(conn))
-        {
-            // RETURN ERR_NOTREGISTERED
-        }
+        RPL_WHEN_NOTREGISTERED;
         _ins_quit_process(conn, source, ins, args);
         break;
 
     case "WHOIS"_hash:
-        if (!_check_registered(conn))
-        {
-            // RETURN ERR_NOTREGISTERED
-        }
+        RPL_WHEN_NOTREGISTERED;
         break;
 
     case "MODE"_hash:
-        if (!_check_registered(conn))
-        {
-            // RETURN ERR_NOTREGISTERED
-        }
+        RPL_WHEN_NOTREGISTERED;
         break;
 
     default:
         if (_check_registered(conn))
         {
-            // RETURN ERR_UNKNOWNCOMMAND
+            conn->send(Reply::gen_reply({_hostname,
+                "421",  // 421 for ERR_UNKNOWNCOMMAND
+                ins,    // <command>
+                ":Unknown command"}));
         }
         break;
     }
@@ -97,11 +102,16 @@ static void _ins_nick_process(const TcpConnectionPtr& conn,
 
     if (args.empty())
     {
-        // RETURN ERR_NONNICKNAMEGIVEN
+        conn->send(Reply::gen_reply({_hostname,
+            "431",  // 431 for ERR_NONICKNAMEGIVEN
+            ":No nickname given"}));
     }
     else if (nick_conn.count(args.front()))
     {
-        // RETURN ERR_NICKNAMEINUSE
+        conn->send(Reply::gen_reply({_hostname,
+            "432",  // 432 for ERR_NICKNAMEINUSE
+            args.front(), // <nick>
+            ":Nickname is already in use"}));
     }
     else if (conn_session.count(conn))
     {
