@@ -8,7 +8,14 @@
 
 namespace npcp
 {
-extern std::unordered_map<std::string, icarus::TcpConnectionPtr> users;
+struct Session
+{
+    std::string nickname;
+    std::string realname;
+};
+
+extern std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn;
+extern std::unordered_map<icarus::TcpConnectionPtr, Session> conn_session;
 
 void on_message(const icarus::TcpConnectionPtr &conn, icarus::Buffer *buf /*, Timestamp*/);
 }
