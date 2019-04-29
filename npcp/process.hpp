@@ -1,6 +1,7 @@
-#ifndef NPCP_USERS_HPP
-#define NPCP_USERS_HPP
+#ifndef NPCP_PROCESS_HPP
+#define NPCP_PROCESS_HPP
 
+#include <vector>
 #include <string>
 #include <unordered_map>
 
@@ -16,8 +17,10 @@ struct Session
 
 extern std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn;
 extern std::unordered_map<icarus::TcpConnectionPtr, Session> conn_session;
+extern std::unordered_map<std::string, std::vector<std::string>> channels;
 
-void on_message(const icarus::TcpConnectionPtr &conn, icarus::Buffer *buf /*, Timestamp*/);
+void on_message(const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf /*, Timestamp*/);
 }
 
-#endif // NPCP_USERS_HPP
+
+#endif // NPCP_PROCESS_HPP
