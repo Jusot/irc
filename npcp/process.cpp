@@ -1,3 +1,5 @@
+#include <ctime>
+
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -120,9 +122,23 @@ static void _ins_nick_process(const TcpConnectionPtr& conn,
         nick_conn[args.front()] = conn;
         conn_session[conn] = { args.front(), conn_session[conn].realname };
 
-        // RETURN RPL_WELCOME
-        // RETURN RPL_YOURHOST
-        // RETURN RPL_CREATED
+        conn->send(Reply::gen_reply({_hostname,
+            "001",  // 001 for RPL_WELCOME
+            ":Welcome to the Internet Relay Network\n" +
+            source.substr(1)}));    // <nick>!<user>@<host>
+
+        conn->send(Reply::gen_reply({_hostname,
+            "002",  // 002 for RPL_YOURHOST
+            ":Your host is " +
+            _hostname.substr(1) +       // <server name>
+            ", running version 2"}));   // <ver>
+
+        auto t = std::time(nullptr);
+        conn->send(Reply::gen_reply({_hostname,
+            "003",
+            ":This server was created " + 
+            std::string(std::ctime(&t))})); // <date>
+
         // RETURN RPL_MYINFO
     }
     else
@@ -140,11 +156,16 @@ static bool _ins_user_process(const TcpConnectionPtr& conn,
 
     if (conn_session.count(conn))
     {
-        // RETURN ERR_ALREADYREGISTRED
+        conn->send(Reply::gen_reply({_hostname,
+            "462",  // 462 for ERR_ALREADYREGISTERED
+            ":Unauthorized command (already registered)"}));
     }
     else if (args.size() != 4)
     {
-        // RETURN ERR_NEEDMOREPARAMS
+        conn->send(Reply::gen_reply({_hostname,
+            "461",  // 461 for ERR_NEEDMOREPARAMS
+            ins,    // <command>
+            ":Not enough parameters"}));
     }
     else
     {
