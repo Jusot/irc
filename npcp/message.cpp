@@ -5,6 +5,7 @@
 using namespace npcp;
 
 Message::Message(std::string message)
+  : with_prefix_(false)
 {
     if (message.empty()) return;
 
@@ -21,6 +22,12 @@ Message::Message(std::string message)
         {
             source_ = message.substr(pos + 1, end_pos - pos - 1);
             pos = end_pos + 1;
+            
+            with_prefix_ = true;
+            auto t_pos = source_.find('!'), a_pos = source_.find('@');
+            nick_ = source_.substr(0, t_pos);
+            user_ = source_.substr(t_pos + 1, a_pos - t_pos);
+            hostname_ = source_.substr(a_pos + 1);
         }
         else return;
     }
@@ -40,6 +47,26 @@ Message::Message(std::string message)
         args_.push_back(message.substr(pos, end_pos - pos));
         pos = end_pos + 1;
     }
+}
+
+bool Message::with_prefix() const
+{
+    return with_prefix_;
+}
+
+std::string Message::nick() const
+{
+    return nick_;
+}
+
+std::string Message::user() const
+{
+    return user_;
+}
+
+std::string Message::hostname() const
+{
+    return hostname_;
 }
 
 std::string Message::source() const
