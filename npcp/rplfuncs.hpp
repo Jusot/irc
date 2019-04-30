@@ -2,6 +2,7 @@
 #define NPCP_RPLFUNCS_HPP
 
 #include <string>
+#include <vector>
 
 namespace npcp
 {
@@ -21,6 +22,7 @@ public:
     static std::string err_norecipient(const std::string& command);
     static std::string err_notexttosend();
     static std::string err_unknowncommand(const std::string& command);
+    static std::string err_nomotd();
     static std::string err_nonicknamegiven();
     static std::string err_nicknameinuse(const std::string& nick);
     static std::string err_notregistered();

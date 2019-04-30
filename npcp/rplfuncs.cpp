@@ -75,6 +75,12 @@ std::string Reply::err_unknowncommand(const std::string &command)
         command,
         ":Unknown command" });
 }
+std::string Reply::err_nomotd()
+{
+    return gen_reply({ _m_hostname,
+        "422",
+        ":MOTD File is missing"});
+}
 std::string Reply::err_nonicknamegiven()
 {
     return gen_reply({ _m_hostname,
