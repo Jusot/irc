@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include "message.hpp"
-
 namespace npcp
 {
 class Reply
