@@ -8,7 +8,7 @@
 ### Assignment 2
 + [x] Connection Registration
 + [x] PING and PONG
-+ [ ] MOTD
++ [x] MOTD
 + [ ] LUSERS
 + [ ] WHOIS
 + [ ] ERR_UNKNOWN

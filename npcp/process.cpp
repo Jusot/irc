@@ -80,6 +80,11 @@ void Process::on_message(const TcpConnectionPtr &conn, Buffer *buf)
     case "PONG"_hash:
         break;
 
+    case "MOTD"_hash:
+        RPL_WHEN_NOTREGISTERED;
+        motd_process(conn, msg);
+        break;
+
     case "WHOIS"_hash:
         RPL_WHEN_NOTREGISTERED;
         break;
@@ -172,4 +177,10 @@ void Process::notice_process(const TcpConnectionPtr &conn, const Message &msg)
 void Process::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     conn->send(Reply::rpl_pong(msg.hostname()));
+}
+
+void Process::motd_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    // check 'motd.txt' exits or not
+    conn->send(Reply::err_nomotd());
 }

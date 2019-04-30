@@ -29,6 +29,7 @@ private:
     static void privmsg_process(const icarus::TcpConnectionPtr&, const Message&);
     static void notice_process(const icarus::TcpConnectionPtr&, const Message&);
     static void ping_process(const icarus::TcpConnectionPtr&, const Message&);
+    static void motd_process(const icarus::TcpConnectionPtr&, const Message&);
 
 public:
     static void on_message(const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf /*, Timestamp*/);
