@@ -18,6 +18,7 @@ public:
     std::string user() const;
     std::string hostname() const;
 
+    std::string raw() const;
     std::string source() const;
     std::string command() const;
     std::vector<std::string> args() const;
@@ -29,6 +30,7 @@ private:
     std::string user_;
     std::string hostname_;
 
+    std::string raw_;
     std::string source_;
     std::string command_;
     std::vector<std::string> args_;

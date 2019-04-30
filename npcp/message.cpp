@@ -5,7 +5,8 @@
 using namespace npcp;
 
 Message::Message(std::string message)
-  : with_prefix_(false)
+  : with_prefix_(false),
+    raw_(message)
 {
     if (message.empty()) return;
 
@@ -67,6 +68,11 @@ std::string Message::user() const
 std::string Message::hostname() const
 {
     return hostname_;
+}
+
+std::string Message::raw() const
+{
+    return raw_;
 }
 
 std::string Message::source() const
