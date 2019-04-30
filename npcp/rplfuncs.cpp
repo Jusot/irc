@@ -85,5 +85,6 @@ std::string Reply::gen_reply(const std::vector<std::string> &args)
 {
     std::string reply;
     for (const auto& arg : args) reply += arg + ' ';
+    reply.pop_back();
     return reply + "\r\n";
 }
