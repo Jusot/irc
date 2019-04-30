@@ -39,9 +39,10 @@ static bool _check_registered(const TcpConnectionPtr &conn)
     return conn_session.count(conn) && nick_conn.count(conn_session[conn].nickname);
 }
 
-static void _ins_nick_process(const TcpConnectionPtr&, const Message &);
-static void _ins_user_process(const TcpConnectionPtr&, const Message &);
-static void _ins_quit_process(const TcpConnectionPtr&, const Message &);
+static void _ins_nick_process(const TcpConnectionPtr&, const Message&);
+static void _ins_user_process(const TcpConnectionPtr&, const Message&);
+static void _ins_quit_process(const TcpConnectionPtr&, const Message&);
+static void _ins_ping_process(const TcpConnectionPtr&, const Message&);
 
 void on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
@@ -68,6 +69,14 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
     case "QUIT"_hash:
         RPL_WHEN_NOTREGISTERED;
         _ins_quit_process(conn, msg);
+        break;
+
+    case "PING"_hash:
+        RPL_WHEN_NOTREGISTERED;
+        _ins_ping_process(conn, msg);
+        break;
+
+    case "PONG"_hash:
         break;
 
     case "WHOIS"_hash:
@@ -140,4 +149,10 @@ static void _ins_quit_process(const TcpConnectionPtr &conn, const Message &msg)
     std::string quit_message = msg.args().empty() ? "" : msg.args().front();
     conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
 }
+
+static void _ins_ping_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    conn->send(Reply::rpl_pong(msg.hostname()));
+}
+
 }

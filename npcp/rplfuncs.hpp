@@ -10,6 +10,8 @@ namespace npcp
 class Reply
 {
 public:
+    static std::string rpl_pong(const std::string& server);
+
     static std::string rpl_welcome(const std::string& source);
     static std::string rpl_yourhost(const std::string& ver);
     static std::string rpl_created();

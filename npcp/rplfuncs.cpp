@@ -7,6 +7,13 @@ using namespace npcp;
 static const std::string _m_hostname = ":jusot.com";
 static const std::string _hostname = "jusot.com";
 
+std::string Reply::rpl_pong(const std::string &server)
+{
+    return gen_reply({ _m_hostname,
+        "PONG",
+        server });
+}
+
 std::string Reply::rpl_welcome(const std::string &source)
 {
     return gen_reply({ _m_hostname,

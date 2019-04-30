@@ -7,7 +7,7 @@
 
 ### Assignment 2
 + [x] Connection Registration
-+ [ ] PING and PONG
++ [x] PING and PONG
 + [ ] MOTD
 + [ ] LUSERS
 + [ ] WHOIS
