@@ -10,6 +10,8 @@
 
 namespace npcp
 {
+class Message;
+
 struct Session
 {
     std::string nickname;
