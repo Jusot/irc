@@ -13,8 +13,6 @@ using namespace icarus;
 
 namespace
 {
-static const std::string _hostname = "jusot.com";
-
 constexpr std::size_t cal_hash(const char *str)
 {
     return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
@@ -39,10 +37,11 @@ static bool _check_registered(const TcpConnectionPtr &conn)
     return conn_session.count(conn) && nick_conn.count(conn_session[conn].nickname);
 }
 
-static void _ins_nick_process(const TcpConnectionPtr&, const Message&);
-static void _ins_user_process(const TcpConnectionPtr&, const Message&);
-static void _ins_quit_process(const TcpConnectionPtr&, const Message&);
-static void _ins_ping_process(const TcpConnectionPtr&, const Message&);
+using ProcessFunc = static void (const TcpConnectionPtr&, const Message&);
+static ProcessFunc _command_nick_process,
+                   _command_user_process,
+                   _command_quit_process,
+                   _command_ping_process;
 
 void on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
@@ -53,11 +52,11 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
     switch (hs)
     {
     case "NICK"_hash:
-        _ins_nick_process(conn, msg);
+        _command_nick_process(conn, msg);
         break;
 
     case "USER"_hash:
-        _ins_user_process(conn, msg);
+        _command_user_process(conn, msg);
         break;
 
 #define RPL_WHEN_NOTREGISTERED if (!_check_registered(conn)) \ 
@@ -68,12 +67,12 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
 
     case "QUIT"_hash:
         RPL_WHEN_NOTREGISTERED;
-        _ins_quit_process(conn, msg);
+        _command_quit_process(conn, msg);
         break;
 
     case "PING"_hash:
         RPL_WHEN_NOTREGISTERED;
-        _ins_ping_process(conn, msg);
+        _command_ping_process(conn, msg);
         break;
 
     case "PONG"_hash:
@@ -94,7 +93,7 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
     }
 }
 
-static void _ins_nick_process(const TcpConnectionPtr &conn, const Message &msg)
+static void _command_nick_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     std::lock_guard lock(nick_conn_mutex);
 
@@ -117,7 +116,7 @@ static void _ins_nick_process(const TcpConnectionPtr &conn, const Message &msg)
     else nick_conn[msg.args().front()] = nullptr;
 }
 
-static void _ins_user_process(const TcpConnectionPtr &conn, const Message &msg)
+static void _command_user_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     std::lock_guard lock(nick_conn_mutex);
 
@@ -138,7 +137,7 @@ static void _ins_user_process(const TcpConnectionPtr &conn, const Message &msg)
     }
 }
 
-static void _ins_quit_process(const TcpConnectionPtr &conn, const Message &msg)
+static void _command_quit_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     {
         std::lock_guard lock(nick_conn_mutex);
@@ -150,7 +149,7 @@ static void _ins_quit_process(const TcpConnectionPtr &conn, const Message &msg)
     conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
 }
 
-static void _ins_ping_process(const TcpConnectionPtr &conn, const Message &msg)
+static void _command_ping_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     conn->send(Reply::rpl_pong(msg.hostname()));
 }
