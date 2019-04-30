@@ -40,8 +40,8 @@ static bool _check_registered(const TcpConnectionPtr &conn)
 }
 
 static void _ins_nick_process(const TcpConnectionPtr&, const Message &);
-static bool _ins_user_process(const TcpConnectionPtr&, const Message &);
-static bool _ins_quit_process(const TcpConnectionPtr&, const Message &);
+static void _ins_user_process(const TcpConnectionPtr&, const Message &);
+static void _ins_quit_process(const TcpConnectionPtr&, const Message &);
 
 void on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
@@ -108,7 +108,7 @@ static void _ins_nick_process(const TcpConnectionPtr &conn, const Message &msg)
     else nick_conn[msg.args().front()] = nullptr;
 }
 
-static bool _ins_user_process(const TcpConnectionPtr &conn, const Message &msg)
+static void _ins_user_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     std::lock_guard lock(nick_conn_mutex);
 
@@ -129,13 +129,15 @@ static bool _ins_user_process(const TcpConnectionPtr &conn, const Message &msg)
     }
 }
 
-static bool _ins_quit_process(const TcpConnectionPtr &conn, const Message &msg)
+static void _ins_quit_process(const TcpConnectionPtr &conn, const Message &msg)
 {
-    std::lock_guard lock(nick_conn_mutex);
+    {
+        std::lock_guard lock(nick_conn_mutex);
+        nick_conn.erase(conn_session[conn].nickname);
+        conn_session.erase(conn);
+    }
 
-    nick_conn.erase(conn_session[conn].nickname);
-    conn_session.erase(conn);
-
-    // RETURN Closing Link: HOSTNAME (MSG)
+    std::string quit_message = msg.args().empty() ? "" : msg.args().front();
+    conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
 }
 }
