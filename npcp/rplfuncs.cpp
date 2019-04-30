@@ -48,6 +48,26 @@ std::string Reply::rpl_myinfo(const std::string &version,
         avaliable_channel_modes });
 }
 
+std::string Reply::err_nosuchnick(const std::string &nickname)
+{
+    return gen_reply({_m_hostname,
+        "401",
+        nickname,
+        ":No such nick/channel"});
+}
+std::string Reply::err_norecipient(const std::string &command)
+{
+    return gen_reply({_m_hostname,
+        "411",
+        ":No recipient given",
+        "(" + command + ")"});
+}
+std::string Reply::err_notexttosend()
+{
+    return gen_reply({_m_hostname, 
+        "412",
+        ":No text to send"});
+}
 std::string Reply::err_unknowncommand(const std::string &command)
 {
     return gen_reply({ _m_hostname,
