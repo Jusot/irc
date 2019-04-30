@@ -67,6 +67,11 @@ void Process::on_message(const TcpConnectionPtr &conn, Buffer *buf)
         privmsg_process(conn, msg);
         break;
 
+    case "NOTICE"_hash:
+        RPL_WHEN_NOTREGISTERED;
+        notice_process(conn, msg);
+        break;
+
     case "PING"_hash:
         RPL_WHEN_NOTREGISTERED;
         ping_process(conn, msg);
@@ -155,6 +160,12 @@ void Process::privmsg_process(const TcpConnectionPtr &conn, const Message &msg)
     else if (!nick_conn.count(msg.args().front()))
         conn->send(Reply::err_nosuchnick(msg.args().front()));
     else
+        nick_conn[msg.args().front()]->send(msg.raw());
+}
+
+void Process::notice_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    if (msg.args().size() >= 2 && nick_conn.count(msg.args().front()))
         nick_conn[msg.args().front()]->send(msg.raw());
 }
 

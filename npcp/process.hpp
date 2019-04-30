@@ -19,13 +19,14 @@ struct Session
 class Process
 {
 private:
-    static bool check_registered(const TcpConnectionPtr&);
+    static bool check_registered(const icarus::TcpConnectionPtr&);
 
-    static void nick_process(const TcpConnectionPtr&, const Message&);
-    static void user_process(const TcpConnectionPtr&, const Message&);
-    static void quit_process(const TcpConnectionPtr&, const Message&);
-    static void privmsg_process(const TcpConnectionPtr&, const Message&);
-    static void ping_process(const TcpConnectionPtr&, const Message&);
+    static void nick_process(const icarus::TcpConnectionPtr&, const Message&);
+    static void user_process(const icarus::TcpConnectionPtr&, const Message&);
+    static void quit_process(const icarus::TcpConnectionPtr&, const Message&);
+    static void privmsg_process(const icarus::TcpConnectionPtr&, const Message&);
+    static void notice_process(const icarus::TcpConnectionPtr&, const Message&);
+    static void ping_process(const icarus::TcpConnectionPtr&, const Message&);
 
 public:
     static void on_message(const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf /*, Timestamp*/);
