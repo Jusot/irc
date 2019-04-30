@@ -9,10 +9,16 @@
 #include "process.hpp"
 #include "rplfuncs.hpp"
 
+using namespace npcp;
 using namespace icarus;
 
 namespace
 {
+std::mutex nick_conn_mutex;
+std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn;
+std::unordered_map<icarus::TcpConnectionPtr, Session> conn_session;
+std::unordered_map<std::string, std::vector<std::string>> channels;
+
 constexpr std::size_t cal_hash(const char *str)
 {
     return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
@@ -24,26 +30,12 @@ constexpr std::size_t operator""_hash(const char *str, std::size_t)
 }
 }
 
-namespace npcp
-{
-std::unordered_map<std::string, TcpConnectionPtr> nick_conn;
-std::unordered_map<TcpConnectionPtr, Session> conn_session;
-std::unordered_map<std::string, std::vector<std::string>> channels;
-
-std::mutex nick_conn_mutex;
-
-static bool _check_registered(const TcpConnectionPtr &conn)
+bool Process::check_registered(const TcpConnectionPtr &conn)
 {
     return conn_session.count(conn) && nick_conn.count(conn_session[conn].nickname);
 }
 
-using ProcessFunc = static void (const TcpConnectionPtr&, const Message&);
-static ProcessFunc _command_nick_process,
-                   _command_user_process,
-                   _command_quit_process,
-                   _command_ping_process;
-
-void on_message(const TcpConnectionPtr &conn, Buffer *buf)
+void Process::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
     Message msg(buf->retrieve_all_as_string());
 
@@ -52,14 +44,14 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
     switch (hs)
     {
     case "NICK"_hash:
-        _command_nick_process(conn, msg);
+        nick_process(conn, msg);
         break;
 
     case "USER"_hash:
-        _command_user_process(conn, msg);
+        user_process(conn, msg);
         break;
 
-#define RPL_WHEN_NOTREGISTERED if (!_check_registered(conn)) \ 
+#define RPL_WHEN_NOTREGISTERED if (!check_registered(conn)) \ 
         { \
             conn->send(Reply::err_notregistered()); \
             break; \
@@ -67,12 +59,12 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
 
     case "QUIT"_hash:
         RPL_WHEN_NOTREGISTERED;
-        _command_quit_process(conn, msg);
+        quit_process(conn, msg);
         break;
 
     case "PING"_hash:
         RPL_WHEN_NOTREGISTERED;
-        _command_ping_process(conn, msg);
+        ping_process(conn, msg);
         break;
 
     case "PONG"_hash:
@@ -87,13 +79,13 @@ void on_message(const TcpConnectionPtr &conn, Buffer *buf)
         break;
 
     default:
-        if (_check_registered(conn))
+        if (check_registered(conn))
             conn->send(Reply::err_unknowncommand(msg.command()));
         break;
     }
 }
 
-static void _command_nick_process(const TcpConnectionPtr &conn, const Message &msg)
+void Process::nick_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     std::lock_guard lock(nick_conn_mutex);
 
@@ -116,7 +108,7 @@ static void _command_nick_process(const TcpConnectionPtr &conn, const Message &m
     else nick_conn[msg.args().front()] = nullptr;
 }
 
-static void _command_user_process(const TcpConnectionPtr &conn, const Message &msg)
+void Process::user_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     std::lock_guard lock(nick_conn_mutex);
 
@@ -137,7 +129,7 @@ static void _command_user_process(const TcpConnectionPtr &conn, const Message &m
     }
 }
 
-static void _command_quit_process(const TcpConnectionPtr &conn, const Message &msg)
+void Process::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     {
         std::lock_guard lock(nick_conn_mutex);
@@ -149,9 +141,7 @@ static void _command_quit_process(const TcpConnectionPtr &conn, const Message &m
     conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
 }
 
-static void _command_ping_process(const TcpConnectionPtr &conn, const Message &msg)
+void Process::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     conn->send(Reply::rpl_pong(msg.hostname()));
-}
-
 }
