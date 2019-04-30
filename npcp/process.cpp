@@ -62,6 +62,11 @@ void Process::on_message(const TcpConnectionPtr &conn, Buffer *buf)
         quit_process(conn, msg);
         break;
 
+    case "PRIVMSG"_hash:
+        RPL_WHEN_NOTREGISTERED;
+        privmsg_process(conn, msg);
+        break;
+
     case "PING"_hash:
         RPL_WHEN_NOTREGISTERED;
         ping_process(conn, msg);
@@ -139,6 +144,18 @@ void Process::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 
     std::string quit_message = msg.args().empty() ? "" : msg.args().front();
     conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
+}
+
+void Process::privmsg_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    if (msg.args().empty())
+        conn->send(Reply::err_norecipient(msg.command()));
+    else if (msg.args().size() == 1)
+        conn->send(Reply::err_notexttosend());
+    else if (!nick_conn.count(msg.args().front()))
+        conn->send(Reply::err_nosuchnick(msg.args().front()));
+    else
+        nick_conn[msg.args().front()]->send(msg.raw());
 }
 
 void Process::ping_process(const TcpConnectionPtr &conn, const Message &msg)
