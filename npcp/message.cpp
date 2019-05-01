@@ -23,7 +23,7 @@ Message::Message(std::string message)
         {
             source_ = message.substr(pos + 1, end_pos - pos - 1);
             pos = end_pos + 1;
-            
+
             with_prefix_ = true;
             auto t_pos = source_.find('!'), a_pos = source_.find('@');
             nick_ = source_.substr(0, t_pos);

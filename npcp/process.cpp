@@ -16,7 +16,7 @@ namespace
 {
 std::mutex nick_conn_mutex;
 std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn;
-std::unordered_map<icarus::TcpConnectionPtr, Session> conn_session;
+std::unordered_map<icarus::TcpConnectionPtr, Session>     conn_session;
 std::unordered_map<std::string, std::vector<std::string>> channels;
 
 constexpr std::size_t cal_hash(const char *str)
@@ -51,7 +51,7 @@ void Process::on_message(const TcpConnectionPtr &conn, Buffer *buf)
         user_process(conn, msg);
         break;
 
-#define RPL_WHEN_NOTREGISTERED if (!check_registered(conn)) \ 
+#define RPL_WHEN_NOTREGISTERED if (!check_registered(conn)) \
         { \
             conn->send(Reply::err_notregistered()); \
             break; \

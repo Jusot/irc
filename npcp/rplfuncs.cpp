@@ -64,7 +64,7 @@ std::string Reply::err_norecipient(const std::string &command)
 }
 std::string Reply::err_notexttosend()
 {
-    return gen_reply({_m_hostname, 
+    return gen_reply({_m_hostname,
         "412",
         ":No text to send"});
 }
