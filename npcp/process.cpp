@@ -84,6 +84,10 @@ void Process::on_message(const TcpConnectionPtr &conn, Buffer *buf)
         RPL_WHEN_NOTREGISTERED;
         motd_process(conn, msg);
         break;
+    
+    case "LUSERS"_hash:
+        RPL_WHEN_NOTREGISTERED;
+        break;
 
     case "WHOIS"_hash:
         RPL_WHEN_NOTREGISTERED;
