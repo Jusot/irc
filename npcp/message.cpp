@@ -34,7 +34,7 @@ Message::Message(std::string message)
     }
 
     end_pos = std::min(raw_.find(' ', pos), crlf_pos);
-    command_ = message.substr(pos, end_pos - pos);
+    command_ = raw_.substr(pos, end_pos - pos);
     pos = end_pos + 1;
 
     while (pos < crlf_pos)
