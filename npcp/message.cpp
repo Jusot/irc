@@ -6,22 +6,22 @@ using namespace npcp;
 
 Message::Message(std::string message)
   : with_prefix_(false),
-    raw_(message)
+    raw_(std::move(message))
 {
-    if (message.empty()) return;
+    if (raw_.empty()) return;
 
-    auto crlf_pos = message.find("\r\n");
-    if (crlf_pos == message.npos) return;
+    auto crlf_pos = raw_.find("\r\n");
+    if (crlf_pos == std::string::npos) return;
     else if (crlf_pos > 510) crlf_pos = 510;
 
     std::size_t pos = 0, end_pos;
 
-    if (message[pos] == ':')
+    if (raw_[pos] == ':')
     {
-        end_pos = message.find(' ', pos);
-        if (end_pos != message.npos)
+        end_pos = raw_.find(' ', pos);
+        if (end_pos != raw_.npos)
         {
-            source_ = message.substr(pos + 1, end_pos - pos - 1);
+            source_ = raw_.substr(pos + 1, end_pos - pos - 1);
             pos = end_pos + 1;
 
             with_prefix_ = true;
@@ -33,19 +33,19 @@ Message::Message(std::string message)
         else return;
     }
 
-    end_pos = std::min(message.find(' ', pos), crlf_pos);
+    end_pos = std::min(raw_.find(' ', pos), crlf_pos);
     command_ = message.substr(pos, end_pos - pos);
     pos = end_pos + 1;
 
     while (pos < crlf_pos)
     {
-        if (message[pos] == ':')
+        if (raw_[pos] == ':')
         {
-            args_.push_back(message.substr(pos + 1, crlf_pos - pos - 1));
+            args_.push_back(raw_.substr(pos + 1, crlf_pos - pos - 1));
             break;
         }
-        end_pos = std::min(message.find(' ', pos), crlf_pos);
-        args_.push_back(message.substr(pos, end_pos - pos));
+        end_pos = std::min(raw_.find(' ', pos), crlf_pos);
+        args_.push_back(raw_.substr(pos, end_pos - pos));
         pos = end_pos + 1;
     }
 }
