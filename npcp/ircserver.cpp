@@ -5,11 +5,21 @@
 #include "../icarus/icarus/buffer.hpp"
 #include "../icarus/icarus/tcpconnection.hpp"
 
+namespace
+{
+constexpr std::size_t cal_hash(const char* str)
+{
+    return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
+}
+
+constexpr std::size_t operator""_hash(const char* str, std::size_t)
+{
+    return cal_hash(str);
+}
+} // namespace
+
 namespace npcp
 {
-using namespace std;
-using namespace icarus;
-
 IrcServer::IrcServer(icarus::EventLoop *loop, const icarus::InetAddress &listen_addr, std::string name)
   : server_(loop, listen_addr, std::move(name))
 {
@@ -22,20 +32,6 @@ void IrcServer::start()
 {
     server_.start();
 }
-
-namespace
-{
-
-constexpr std::size_t cal_hash(const char *str)
-{
-    return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
-}
-
-constexpr std::size_t operator""_hash(const char *str, std::size_t)
-{
-    return cal_hash(str);
-}
-} // namespace
 
 bool IrcServer::check_registered(const TcpConnectionPtr &conn)
 {
