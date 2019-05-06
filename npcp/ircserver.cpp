@@ -150,7 +150,7 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
     }
     else
     {
-        const auto &nick = msg.args().front();
+        const auto nick = msg.args().front();
 
         nick_conn_[nick] = conn;
         conn_session_[conn] = {Session::State::NICK, nick, "", ""};
@@ -165,8 +165,7 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
         conn->send(reply::err_alreadyregistered());
     else if (msg.args().size() != 4)
         conn->send(reply::err_needmoreparams(msg.command()));
-    else if ((user_nick_.count(msg.args().front()) && !nick_conn_.count(user_nick_[msg.args().front()])) ||
-        (conn_session_.count(conn) && conn_session_[conn].state == Session::State::NICK))
+    else if (conn_session_.count(conn) && conn_session_[conn].state == Session::State::NICK)
     {
         auto& session = conn_session_[conn];
         session = {
@@ -249,7 +248,7 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
     std::string user, realname;
 
 //    const auto& nick = conn_session_[conn].nickname;
-    if (nick_conn_.find(nick) != nick_conn_.end())
+    if (nick_conn_.find(nick) == nick_conn_.end())
     {
         nick.clear();
         nick = "Unknown";
