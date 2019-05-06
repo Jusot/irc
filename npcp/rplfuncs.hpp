@@ -2,7 +2,6 @@
 #define NPCP_RPLFUNCS_HPP
 
 #include <string>
-#include <vector>
 
 namespace npcp
 {
@@ -14,8 +13,8 @@ std::string rpl_welcome(const std::string& source);
 std::string rpl_yourhost(const std::string& ver);
 std::string rpl_created();
 std::string rpl_myinfo(const std::string& version,
-                              const std::string& avaliable_user_modes,
-                              const std::string& avaliable_channel_modes);
+    const std::string& avaliable_user_modes,
+    const std::string& avaliable_channel_modes);
 
 std::string err_nosuchnick(const std::string &nickname);
 std::string err_norecipient(const std::string& command);
@@ -27,7 +26,6 @@ std::string err_nicknameinuse(const std::string& nick);
 std::string err_notregistered();
 std::string err_needmoreparams(const std::string& command);
 std::string err_alreadyregistered();
-
 } // namespace reply
 } // namespace npcp
 

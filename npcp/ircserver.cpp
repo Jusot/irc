@@ -1,6 +1,9 @@
+#include <string>
+
 #include "ircserver.hpp"
 #include "rplfuncs.hpp"
 #include "message.hpp"
+
 #include "../icarus/icarus/tcpserver.hpp"
 #include "../icarus/icarus/buffer.hpp"
 #include "../icarus/icarus/tcpconnection.hpp"
