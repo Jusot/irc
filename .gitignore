@@ -41,3 +41,4 @@
 bin/
 obj/
 /test/chirc
+build/
