@@ -258,25 +258,21 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
         return;
 
     std::string nick = args[0];
-    std::string user, realname;
 
 //    const auto& nick = conn_session_[conn].nickname;
     if (nick_conn_.find(nick) == nick_conn_.end())
     {
-        nick.clear();
-        nick = "Unknown";
-        user = "Unknown";
-        realname = "Unknown";
+        conn->send(reply::err_nosuchnick(nick));
     }
     else
     {
         auto session = conn_session_[nick_conn_[nick]];
-        user = session.username;
-        realname = session.realname;
+        std::string user = session.username;
+        std::string realname = session.realname;
+        conn->send(reply::rpl_whoisuser(nick, user, realname));
+        conn->send(reply::rpl_whoisserver(nick));
+        conn->send(reply::rpl_endofwhois(nick));
     }
 
-    conn->send(reply::rpl_whoisuser(nick, user, realname));
-    conn->send(reply::rpl_whoisserver(nick));
-    conn->send(reply::rpl_endofwhois(nick));
 }
 } // namespace npcp
