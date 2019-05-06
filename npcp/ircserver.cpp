@@ -40,7 +40,7 @@ void IrcServer::start()
 
 bool IrcServer::check_registered(const TcpConnectionPtr &conn)
 {
-    return conn_session_.count(conn) && nick_conn_.count(conn_session_[conn].nickname);
+    return conn_session_.count(conn) && conn_session_[conn].state == Session::State::REGISTERED;
 }
 
 void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
@@ -122,39 +122,52 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
         conn->send(reply::err_nonicknamegiven());
     else if (nick_conn_.count(msg.args().front()))
         conn->send(reply::err_nicknameinuse(msg.args().front()));
-    else if (conn_session_.count(conn))
+    else if (conn_session_.count(conn) && conn_session_[conn].state == Session::State::USER)
     {
         if (nick_conn_.count(conn_session_[conn].nickname))
             nick_conn_.erase(conn_session_[conn].nickname);
         nick_conn_[msg.args().front()] = conn;
-        conn_session_[conn] = { msg.args().front(), conn_session_[conn].realname };
 
-        conn->send(reply::rpl_welcome(msg.source()));
+        auto &session = conn_session_[conn];
+        session = { Session::State::REGISTERED, msg.args().front(), session.username, session.realname };
+
+        conn->send(reply::rpl_welcome(session.nickname,
+            session.username,
+            "*"));
         conn->send(reply::rpl_yourhost("2"));
         conn->send(reply::rpl_created());
         conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
     }
-    else nick_conn_[msg.args().front()].reset();
+    else
+    {
+        nick_conn_[msg.args().front()] = conn;
+        conn_session_[conn] = {Session::State::NICK, msg.args().front(), "", ""};
+    }
 }
 
 void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     std::lock_guard lock(nick_conn_mutex_);
 
-    if (conn_session_.count(conn))
+    if (check_registered(conn))
         conn->send(reply::err_alreadyregistered());
     else if (msg.args().size() != 4)
         conn->send(reply::err_needmoreparams(msg.command()));
+    else if (conn_session_.count(conn) && conn_session_[conn].state == Session::State::NICK)
+    {
+        auto &session = conn_session_[conn];
+        session = { Session::State::REGISTERED, session.nickname, msg.args()[0], msg.args()[3] };
+
+        conn->send(reply::rpl_welcome(session.nickname,
+            session.username,
+            "*"));
+        conn->send(reply::rpl_yourhost("2"));
+        conn->send(reply::rpl_created());
+        conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
+    }
     else
     {
-        conn_session_[conn] = { msg.args()[0], msg.args()[3] };
-        if (nick_conn_.count(msg.args()[0]))
-        {
-            conn->send(reply::rpl_welcome(msg.source()));
-            conn->send(reply::rpl_yourhost("2"));
-            conn->send(reply::rpl_created());
-            conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
-        }
+        conn_session_[conn] = { Session::State::USER, "", msg.args()[0], msg.args()[3] };
     }
 }
 
