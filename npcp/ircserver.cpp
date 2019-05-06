@@ -45,8 +45,10 @@ bool IrcServer::check_registered(const TcpConnectionPtr &conn)
 
 void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
-    Message msg(buf->retrieve_all_as_string());
-
+    const char* crlf = buf->findCRLF();
+    if (crlf == nullptr)
+        return;
+    Message msg(buf->retrieve_as_string(crlf - buf->peek() + 2));
     auto hs = cal_hash(msg.command().c_str());
 
     switch (hs)
@@ -168,6 +170,9 @@ void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 
     std::string quit_message = msg.args().empty() ? "" : msg.args().front();
     conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
+    conn->get_loop()->queue_in_loop([conn] () {
+        conn->shutdown();
+    });
 }
 
 void IrcServer::privmsg_process(const TcpConnectionPtr &conn, const Message &msg)
