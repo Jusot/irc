@@ -75,6 +75,57 @@ std::string rpl_myinfo(const std::string & version,
         });
 }
 
+std::string rpl_luserclient(int users_cnt, int services_cnt, int servers_cnt)
+{
+    return gen_reply({
+        _m_hostname,
+        "251",
+        ":There are " + std::to_string(users_cnt) + " users",
+        "and " + std::to_string(services_cnt) + " services",
+        "on " + std::to_string(servers_cnt) + " servers"
+        });
+}
+
+std::string rpl_luserop(int opers_cnt)
+{
+    return gen_reply({
+        _m_hostname,
+        "252",
+        std::to_string(opers_cnt),
+        ":operator(s) online"
+        });
+}
+
+std::string rpl_luserunknown(int unknown_connections_cnt)
+{
+    return gen_reply({
+        _m_hostname,
+        "253",
+        std::to_string(unknown_connections_cnt),
+        ":unknown connection(s)"
+        });
+}
+
+std::string rpl_luserchannels(int channels_cnt)
+{
+    return gen_reply({
+        _m_hostname,
+        "254",
+        std::to_string(channels_cnt),
+        ":channels formed"
+        });
+}
+
+std::string rpl_luserme(int clients_cnt, int servers_cnt)
+{
+    return gen_reply({
+        _m_hostname,
+        "255",
+        ":I have " + std::to_string(clients_cnt) + "clients",
+        "and " + std::to_string(servers_cnt) + " servers"
+        });
+}
+
 std::string err_nosuchnick(const std::string & nickname)
 {
     return gen_reply({
