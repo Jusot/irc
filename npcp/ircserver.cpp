@@ -132,6 +132,7 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
 
         auto &session = conn_session_[conn];
         session = { Session::State::REGISTERED, msg.args().front(), session.username, session.realname };
+        user_nick_[session.username] = msg.args().front();
 
         conn->send(reply::rpl_welcome(session.nickname,
             session.username,
@@ -155,11 +156,18 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
         conn->send(reply::err_alreadyregistered());
     else if (msg.args().size() != 4)
         conn->send(reply::err_needmoreparams(msg.command()));
-    else if (conn_session_.count(conn) && conn_session_[conn].state == Session::State::NICK)
+    else if ((user_nick_.count(msg.args().front()) && !nick_conn_.count(user_nick_[msg.args().front()])) ||
+        (conn_session_.count(conn) && conn_session_[conn].state == Session::State::NICK))
     {
-        auto &session = conn_session_[conn];
-        session = { Session::State::REGISTERED, session.nickname, msg.args()[0], msg.args()[3] };
+        conn_session_[conn] = { 
+            Session::State::REGISTERED, 
+            conn_session_.count(conn) ? conn_session_[conn].nickname : user_nick_[msg.args()[0]], 
+            msg.args()[0],
+            msg.args()[3]
+        };
+        auto& session = conn_session_[conn];
         nick_conn_[session.nickname] = conn;
+        user_nick_[session.username] = session.nickname;
 
         conn->send(reply::rpl_welcome(session.nickname,
             session.username,
@@ -178,8 +186,8 @@ void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     {
         std::lock_guard lock(nick_conn_mutex_);
-        conn_session_[conn].state = Session::State::NICK;
-        nick_conn_[conn_session_[conn].nickname].reset();
+        nick_conn_.erase[conn_session_[conn].nickname].reset();
+        conn_session_.erase(conn);
     }
 
     std::string quit_message = msg.args().empty() ? "" : msg.args().front();
