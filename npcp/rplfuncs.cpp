@@ -1,4 +1,5 @@
 #include <ctime>
+#include <vector>
 #include <cassert>
 #include <string>
 #include <sstream>
@@ -30,13 +31,15 @@ std::string rpl_pong(const std::string& server)
         server });
 }
 
-std::string rpl_welcome(const std::string& source)
+std::string rpl_welcome(const std::string& nick,
+    const std::string &user,
+    const std::string &host)
 {
     return gen_reply({
         _m_hostname,
         "001",
-        ":Welcome to the Internet Relay Network\n" +
-        source
+        ":Welcome to the Internet Relay Network",
+        nick + "!" + user + "@." + host
         });
 }
 
