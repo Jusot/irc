@@ -7,7 +7,7 @@ namespace npcp
 {
 namespace reply
 {
-std::string rpl_pong();
+std::string rpl_pong(const std::string& server);
 
 std::string rpl_welcome(const std::string &nick,
     const std::string &user, 

@@ -24,11 +24,12 @@ namespace npcp
 {
 namespace reply
 {
-std::string rpl_pong()
+std::string rpl_pong(const std::string& server)
 {
     return gen_reply({
+        _m_hostname,
         "PONG",
-        _m_hostname });
+        server });
 }
 
 std::string rpl_welcome(const std::string& nick,

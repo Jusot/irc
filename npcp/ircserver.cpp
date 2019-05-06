@@ -135,7 +135,7 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
 
         conn->send(reply::rpl_welcome(session.nickname,
             session.username,
-            "*"));
+            "jusot.com"));
         conn->send(reply::rpl_yourhost("2"));
         conn->send(reply::rpl_created());
         conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
@@ -159,10 +159,11 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
     {
         auto &session = conn_session_[conn];
         session = { Session::State::REGISTERED, session.nickname, msg.args()[0], msg.args()[3] };
+        nick_conn_[session.nickname] = conn;
 
         conn->send(reply::rpl_welcome(session.nickname,
             session.username,
-            "*"));
+            "jusot.com"));
         conn->send(reply::rpl_yourhost("2"));
         conn->send(reply::rpl_created());
         conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
@@ -177,8 +178,8 @@ void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     {
         std::lock_guard lock(nick_conn_mutex_);
-        nick_conn_.erase(conn_session_[conn].nickname);
-        conn_session_.erase(conn);
+        conn_session_[conn].state = Session::State::NICK;
+        nick_conn_[conn_session_[conn].nickname].reset();
     }
 
     std::string quit_message = msg.args().empty() ? "" : msg.args().front();
@@ -208,7 +209,7 @@ void IrcServer::notice_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 {
-    conn->send(reply::rpl_pong();
+    conn->send(reply::rpl_pong("jusot.com"));
 }
 
 void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
