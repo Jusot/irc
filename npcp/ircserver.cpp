@@ -43,6 +43,16 @@ bool IrcServer::check_registered(const TcpConnectionPtr &conn)
     return conn_session_.count(conn) && conn_session_[conn].state == Session::State::REGISTERED;
 }
 
+void IrcServer::on_connection(const TcpConnectionPtr &conn)
+{
+    if (!conn->connected() && conn_session_.count(conn))
+    {
+        std::lock_guard lock(nick_conn_mutex_);
+        nick_conn_.erase(conn_session_[conn].nickname);
+        conn_session_.erase(conn);
+    }
+}
+
 void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
     const char* crlf = buf->findCRLF();

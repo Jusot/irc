@@ -20,6 +20,7 @@ class IrcServer
     void start();
 
   private:
+    void on_connection(const icarus::TcpConnectionPtr& conn);
     void on_message(const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf);
 
     bool check_registered(const icarus::TcpConnectionPtr&);
