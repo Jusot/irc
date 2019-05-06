@@ -27,9 +27,9 @@ namespace reply
 std::string rpl_pong(const std::string& server)
 {
     return gen_reply({
-        _m_hostname,
         "PONG",
-        server });
+        server
+    });
 }
 
 std::string rpl_welcome(const std::string& nick,
@@ -125,6 +125,40 @@ std::string rpl_luserme(int clients_cnt, int servers_cnt)
         ":I have " + std::to_string(clients_cnt) + "clients",
         "and " + std::to_string(servers_cnt) + " servers"
         });
+}
+
+std::string rpl_whoisuser(const std::string& nick,          // 311
+                          const std::string& user,
+                          const std::string& realname)
+{
+    return gen_reply({
+        _m_hostname,
+        "311",
+        nick,
+        user,
+        _hostname,
+        "*",
+        ":" + realname
+    });
+}
+std::string rpl_whoisserver(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "312",
+        nick,
+        _hostname,
+        ":server info"
+    });
+}
+std::string rpl_endofwhois(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "318",
+        nick,
+        ":End of WHOIS list"
+    });
 }
 
 std::string err_nosuchnick(const std::string & nickname)

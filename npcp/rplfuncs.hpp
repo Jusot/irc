@@ -22,6 +22,11 @@ std::string rpl_luserop(int);                               // 252
 std::string rpl_luserunknown(int);                          // 253
 std::string rpl_luserchannels(int);                         // 254
 std::string rpl_luserme(int, int);                          // 255
+std::string rpl_whoisuser(const std::string& nick,          // 311
+                          const std::string& user,
+                          const std::string& realname);
+std::string rpl_whoisserver(const std::string& nick);       // 312
+std::string rpl_endofwhois(const std::string& nick);        // 318
 
 std::string err_nosuchnick(const std::string& nickname);    // 401
 std::string err_norecipient(const std::string& command);    // 411
