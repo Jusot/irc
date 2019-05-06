@@ -36,7 +36,14 @@ class IrcServer
 
     struct Session
     {
+        enum class State
+        {
+            NICK,
+            USER,
+            REGISTERED
+        } state;
         std::string nickname;
+        std::string username;
         std::string realname;
     };
 

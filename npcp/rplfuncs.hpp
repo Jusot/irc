@@ -9,7 +9,9 @@ namespace reply
 {
 std::string rpl_pong(const std::string& server);
 
-std::string rpl_welcome(const std::string& source);         // 001
+std::string rpl_welcome(const std::string &nick,
+    const std::string &user, 
+    const std::string &host);                               // 001
 std::string rpl_yourhost(const std::string& ver);           // 002
 std::string rpl_created();                                  // 003
 std::string rpl_myinfo(const std::string& version,
