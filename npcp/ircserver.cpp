@@ -4,8 +4,8 @@
 #include "rplfuncs.hpp"
 #include "message.hpp"
 
-#include "../icarus/icarus/tcpserver.hpp"
 #include "../icarus/icarus/buffer.hpp"
+#include "../icarus/icarus/tcpserver.hpp"
 #include "../icarus/icarus/tcpconnection.hpp"
 
 namespace
@@ -23,10 +23,12 @@ constexpr std::size_t operator""_hash(const char* str, std::size_t)
 
 namespace npcp
 {
-IrcServer::IrcServer(icarus::EventLoop *loop, const icarus::InetAddress &listen_addr, std::string name)
+using namespace icarus;
+
+IrcServer::IrcServer(EventLoop *loop, const InetAddress &listen_addr, std::string name)
   : server_(loop, listen_addr, std::move(name))
 {
-    server_.set_message_callback([this] (const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf) {
+    server_.set_message_callback([this] (const TcpConnectionPtr& conn, Buffer* buf) {
         this->on_message(conn, buf);
     });
 }
@@ -94,10 +96,12 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 
         case "LUSERS"_hash:
             RPL_WHEN_NOTREGISTERED;
+            lusers_process(conn, msg);
             break;
 
         case "WHOIS"_hash:
             RPL_WHEN_NOTREGISTERED;
+            whois_process(conn, msg);
             break;
 
         case "MODE"_hash:
@@ -194,4 +198,5 @@ void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
     // check 'motd.txt' exits or not
     conn->send(reply::err_nomotd());
 }
+
 } // namespace npcp

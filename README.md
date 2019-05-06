@@ -11,7 +11,7 @@
 + [x] MOTD
 + [ ] LUSERS
 + [ ] WHOIS
-+ [ ] ERR_UNKNOWN
++ [x] ERR_UNKNOWN
 + [ ] Robustness
 
 ### Assignment 3
