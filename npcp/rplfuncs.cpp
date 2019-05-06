@@ -39,6 +39,7 @@ std::string rpl_welcome(const std::string& nick,
     return gen_reply({
         _m_hostname,
         "001",
+        nick,
         ":Welcome to the Internet Relay Network",
         nick + "!" + user + "@." + host
         });
