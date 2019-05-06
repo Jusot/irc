@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 #endif
 
     icarus::EventLoop loop;
-    icarus::InetAddress addr(6666);
+    icarus::InetAddress addr(7776);
 
     npcp::IrcServer server(&loop, addr, "irc server");
     

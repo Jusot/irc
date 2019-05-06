@@ -28,6 +28,9 @@ using namespace icarus;
 IrcServer::IrcServer(EventLoop *loop, const InetAddress &listen_addr, std::string name)
   : server_(loop, listen_addr, std::move(name))
 {
+    server_.set_connection_callback([this] (const TcpConnectionPtr& conn) {
+        this->on_connection(conn);
+    });
     server_.set_message_callback([this] (const TcpConnectionPtr& conn, Buffer* buf) {
         this->on_message(conn, buf);
     });
