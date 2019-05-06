@@ -51,7 +51,6 @@ class IrcServer
     std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn_;
     std::unordered_map<icarus::TcpConnectionPtr, Session>     conn_session_;
     std::unordered_map<std::string, std::vector<std::string>> channels_;
-    std::unordered_map<std::string, std::string>              user_nick_;
 
     icarus::TcpServer server_;
 };
