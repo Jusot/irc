@@ -37,8 +37,17 @@
 *.sln
 *.vcxproj*
 
+# Files
+*~
+*.orig
+*.pyc
+.cache
+results
+report.html
+report.json
+alltests
+
 # Folders
 bin/
 obj/
-/test/chirc
 build/
