@@ -208,7 +208,7 @@ void IrcServer::notice_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 {
-    conn->send(reply::rpl_pong(msg.hostname()));
+    conn->send(reply::rpl_pong();
 }
 
 void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
