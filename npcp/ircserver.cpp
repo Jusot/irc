@@ -1,19 +1,34 @@
+#include <string>
+
 #include "ircserver.hpp"
 #include "rplfuncs.hpp"
 #include "message.hpp"
-#include "../icarus/icarus/tcpserver.hpp"
+
 #include "../icarus/icarus/buffer.hpp"
+#include "../icarus/icarus/tcpserver.hpp"
 #include "../icarus/icarus/tcpconnection.hpp"
+
+namespace
+{
+constexpr std::size_t cal_hash(const char* str)
+{
+    return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
+}
+
+constexpr std::size_t operator""_hash(const char* str, std::size_t)
+{
+    return cal_hash(str);
+}
+} // namespace
 
 namespace npcp
 {
-using namespace std;
 using namespace icarus;
 
-IrcServer::IrcServer(icarus::EventLoop *loop, const icarus::InetAddress &listen_addr, std::string name)
+IrcServer::IrcServer(EventLoop *loop, const InetAddress &listen_addr, std::string name)
   : server_(loop, listen_addr, std::move(name))
 {
-    server_.set_message_callback([this] (const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf) {
+    server_.set_message_callback([this] (const TcpConnectionPtr& conn, Buffer* buf) {
         this->on_message(conn, buf);
     });
 }
@@ -22,20 +37,6 @@ void IrcServer::start()
 {
     server_.start();
 }
-
-namespace
-{
-
-constexpr std::size_t cal_hash(const char *str)
-{
-    return (*str == '\0') ? 0 : ((cal_hash(str + 1) * 201314 + *str) % 5201314);
-}
-
-constexpr std::size_t operator""_hash(const char *str, std::size_t)
-{
-    return cal_hash(str);
-}
-} // namespace
 
 bool IrcServer::check_registered(const TcpConnectionPtr &conn)
 {
@@ -95,10 +96,12 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 
         case "LUSERS"_hash:
             RPL_WHEN_NOTREGISTERED;
+            lusers_process(conn, msg);
             break;
 
         case "WHOIS"_hash:
             RPL_WHEN_NOTREGISTERED;
+            whois_process(conn, msg);
             break;
 
         case "MODE"_hash:
@@ -194,5 +197,15 @@ void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     // check 'motd.txt' exits or not
     conn->send(reply::err_nomotd());
+}
+
+void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+
+}
+
+void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+
 }
 } // namespace npcp
