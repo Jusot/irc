@@ -127,7 +127,7 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
     else if (conn_session_.count(conn) && conn_session_[conn].state == Session::State::USER)
     {
         auto &session = conn_session_[conn];
-        const auto &nick = msg.args().front();
+        const auto nick = msg.args().front();
 
         if (nick_conn_.count(session.nickname))
             nick_conn_.erase(session.nickname);
