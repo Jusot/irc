@@ -199,4 +199,13 @@ void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
     conn->send(reply::err_nomotd());
 }
 
+void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+
+}
+
+void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+
+}
 } // namespace npcp
