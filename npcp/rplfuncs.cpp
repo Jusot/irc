@@ -58,12 +58,12 @@ std::string rpl_yourhost(const std::string & nick,
 
 std::string rpl_created(const std::string & nick)
 {
-    auto t = std::time(nullptr);
+    // auto t = std::time(nullptr);
     return gen_reply({
         _m_hostname,
         "003",
         nick,
-        ":This server was created " + std::string(std::ctime(&t))
+        ":This server was created " // + std::string(std::ctime(&t))
         });
 }
 
@@ -237,7 +237,8 @@ std::string err_nicknameinuse(const std::string & nick)
 {
     return gen_reply({
         _m_hostname,
-        "432",
+        "433",
+        "*",
         nick,
         ":Nickname is already in use"
         });

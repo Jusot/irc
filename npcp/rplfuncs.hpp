@@ -35,9 +35,9 @@ std::string err_nosuchnick(const std::string& nickname);    // 401
 std::string err_norecipient(const std::string& command);    // 411
 std::string err_notexttosend();                             // 412
 std::string err_unknowncommand(const std::string& command); // 421
-std::string err_nomotd(const std::string &nick);                                   // 422
+std::string err_nomotd(const std::string &nick);            // 422
 std::string err_nonicknamegiven();                          // 431
-std::string err_nicknameinuse(const std::string& nick);     // 432
+std::string err_nicknameinuse(const std::string& nick);     // 433
 std::string err_notregistered(const std::string& nick);     // 451
 std::string err_needmoreparams(const std::string& nick,
     const std::string& command);                            // 461

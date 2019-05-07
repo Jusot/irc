@@ -155,11 +155,11 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
         conn->send(reply::rpl_welcome(
             session.nickname,
             session.username,
-            "jusot.com"));
-        conn->send(reply::rpl_yourhost(nick, "2"));
-        conn->send(reply::rpl_created(session.nickname));
-        conn->send(reply::rpl_myinfo(session.nickname, "2", "ao", "mtov"));
-
+            "jusot.com") + 
+            reply::rpl_yourhost(nick, "2") + 
+            reply::rpl_created(nick) +
+            reply::rpl_myinfo(nick, "2", "ao", "mtov")
+        );
         lusers_process(conn, msg);
         motd_process(conn, msg);
     }
@@ -190,13 +190,13 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
             msg.args()[3]
         };
 
-        conn->send(reply::rpl_welcome(
-            session.nickname,
+        conn->send(reply::rpl_welcome(session.nickname,
             session.username,
-            "jusot.com"));
-        conn->send(reply::rpl_yourhost(session.nickname, "2"));
-        conn->send(reply::rpl_created(session.nickname));
-        conn->send(reply::rpl_myinfo(session.nickname, "2", "ao", "mtov"));
+            "jusot.com" ) + 
+            reply::rpl_yourhost(session.nickname, "2") + 
+            reply::rpl_created(session.nickname) +
+            reply::rpl_myinfo(session.nickname, "2", "ao", "mtov")
+        );
 
         lusers_process(conn, msg);
         motd_process(conn, msg);
@@ -215,8 +215,8 @@ void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
         conn_session_.erase(conn);
     }
 
-    std::string quit_message = msg.args().empty() ? "" : msg.args().front();
-    conn->send("Closing Link: HOSTNAME (" + quit_message + ")\r\n");
+    std::string quit_message = msg.args().empty() ? "Client Quit" : msg.args().front();
+    conn->send(":jusot.com ERROR :Closing Link: jusot.com (" + quit_message + ")\r\n");
     conn->get_loop()->queue_in_loop([conn] () {
         conn->shutdown();
     });
@@ -265,11 +265,13 @@ void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
 
     const auto nick = conn_session_[conn].nickname;
 
-    conn->send(reply::rpl_luserclient(nick, users, 0, 1));
-    conn->send(reply::rpl_luserop(nick, 0));
-    conn->send(reply::rpl_luserunknown(nick, unknowns));
-    conn->send(reply::rpl_luserchannels(nick, channels_.size()));
-    conn->send(reply::rpl_luserme(nick, users + unknowns, 1));
+    conn->send(
+        reply::rpl_luserclient(nick, users, 0, 1) +
+        reply::rpl_luserop(nick, 0) + 
+        reply::rpl_luserunknown(nick, unknowns) +
+        reply::rpl_luserchannels(nick, channels_.size()) +
+        reply::rpl_luserme(nick, users + unknowns, 1)
+    );
 }
 
 void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
