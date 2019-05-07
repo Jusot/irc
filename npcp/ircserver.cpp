@@ -366,7 +366,10 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
         switch (mode[1])
         {
             case 'o':
-
+                if (mode[0] == '-')
+                {
+                    conn->send(":" + nick + " MODE " + nick + " :" + mode + "\r\n");
+                }
                 break;
 
             case 'a':
