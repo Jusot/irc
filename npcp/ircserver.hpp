@@ -54,6 +54,7 @@ class IrcServer
 
     struct ChannelInfo
     {
+        ChannelInfo() : mode(0) { }
         std::string oper;
         std::vector<std::string> users;
         uint32_t mode;
