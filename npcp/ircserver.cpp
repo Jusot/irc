@@ -349,6 +349,34 @@ void IrcServer::oper_process(const TcpConnectionPtr& conn, const Message& msg)
 
 void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
 {
+    auto args = msg.args();
+    const auto nick = conn_session_[conn].nickname;
+    const auto mode = args[1];
+    if (args[0] != nick)
+    {
+        conn->send(reply::err_usersdontmatch(nick));
+    }
+    else if (mode[0] != '+' && mode[0] != '-')
+    {
+        conn->send(reply::err_usersdontmatch(nick));
+    }
+    else
+    {
+        switch (mode[1])
+        {
+            case 'o':
+
+                break;
+
+            case 'a':
+                break;
+
+
+            default:
+                conn->send(reply::err_umodeunknownflag(nick));
+                break;
+        }
+    }
 
 }
 
