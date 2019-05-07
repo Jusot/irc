@@ -1,4 +1,6 @@
 #include <string>
+#include <fstream>
+#include <filesystem>
 
 #include "ircserver.hpp"
 #include "rplfuncs.hpp"
@@ -7,6 +9,8 @@
 #include "../icarus/icarus/buffer.hpp"
 #include "../icarus/icarus/tcpserver.hpp"
 #include "../icarus/icarus/tcpconnection.hpp"
+
+namespace fs = std::filesystem;
 
 namespace
 {
@@ -269,8 +273,12 @@ void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
 {
-    // check 'motd.txt' exits or not
-    conn->send(reply::err_nomotd(conn_session_[conn].nickname));
+    if (fs::is_regular_file("./motd.txt"))
+    {
+        std::ifstream fin("./motd.txt");
+        // ...
+    }
+    else conn->send(reply::err_nomotd(conn_session_[conn].nickname));
 }
 
 void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
