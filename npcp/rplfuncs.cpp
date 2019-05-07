@@ -163,6 +163,7 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
         _m_hostname,
         "311",
         nick,
+        nick,
         user,
         _hostname,
         "*",
@@ -176,6 +177,7 @@ std::string rpl_whoisserver(const std::string& nick)
         _m_hostname,
         "312",
         nick,
+        nick,
         _hostname,
         ":server info"
     });
@@ -186,6 +188,7 @@ std::string rpl_endofwhois(const std::string& nick)
     return gen_reply({
         _m_hostname,
         "318",
+        nick,
         nick,
         ":End of WHOIS list"
     });
