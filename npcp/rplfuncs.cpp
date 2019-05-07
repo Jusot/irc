@@ -47,6 +47,17 @@ std::string rpl_privmsg_or_notice(const std::string& nick,
     });
 }
 
+std::string rpl_join(const std::string& nick,
+    const std::string& user,
+    const std::string& channel)
+{
+    return gen_reply({
+        ":" + nick + "!" + user + "@jusot.com",
+        "JOIN",
+        channel
+    });
+}
+
 std::string rpl_welcome(const std::string& nick,
     const std::string &user,
     const std::string &host)
@@ -191,6 +202,34 @@ std::string rpl_endofwhois(const std::string& nick)
         nick,
         nick,
         ":End of WHOIS list"
+    });
+}
+
+std::string rpl_namreply(const std::string& nick,
+    const std::string& channel,
+    const std::vector<std::string>& nicks)
+{
+    std::string tailing = ":";
+    for (const auto &nick : nicks) tailing += nick + " ";
+    tailing.pop_back();
+
+    return gen_reply({
+        _m_hostname,
+        "353",
+        nick, "=", channel,
+        tailing
+    });
+}
+
+std::string rpl_endofnames(const std::string& nick,
+    const std::string& channel)
+{
+    return gen_reply({
+        _m_hostname,
+        "366",
+        nick,
+        channel,
+        ":End of NAMESN list"
     });
 }
 

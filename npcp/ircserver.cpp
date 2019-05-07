@@ -137,6 +137,11 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
                 mode_process(conn, msg);
                 break;
 
+            case "JOIN"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                join_process(conn, msg);
+                break;
+
             default:
                 if (check_registered(conn))
                     conn->send(reply::err_unknowncommand(
@@ -379,6 +384,24 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
         }
     }
 
+}
+
+void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+    const auto nick = conn_session_[conn].nickname, user = conn_session_[conn].username;
+    const auto args = msg.args();
+
+    if (args.size() != 1) conn->send(reply::err_needmoreparams(nick, msg.command()));
+    else
+    {
+        channels_[args[0]].push_back(nick);
+        conn->send(reply::rpl_join(nick, user, args[0]));
+        conn->send(reply::rpl_namreply(
+            nick, 
+            args[0], 
+            std::vector<std::string>(channels_[args[0]].begin(), channels_[args[0]].end()) ));
+        conn->send(reply::rpl_endofnames(nick, args[0]));
+    }
 }
 
 } // namespace npcp

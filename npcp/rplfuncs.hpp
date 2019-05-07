@@ -13,6 +13,9 @@ std::string rpl_privmsg_or_notice(const std::string& nick,
     bool,
     const std::string& target, 
     const std::string& msg);
+std::string rpl_join(const std::string& nick,
+    const std::string& user,
+    const std::string& channel);
 
 std::string rpl_welcome(const std::string &nick,
     const std::string &user, 
@@ -35,6 +38,11 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
 std::string rpl_endofwhois(const std::string& nick);        // 318
+std::string rpl_namreply(const std::string& nick,
+    const std::string& channel,
+    const std::vector<std::string>& nicks);                 // 353
+std::string rpl_endofnames(const std::string& nick,
+    const std::string& channel);                            // 366
 std::string rpl_motd(const std::string& nick,
     const std::string& line);                               // 372
 std::string rpl_motdstart(const std::string& nick);         // 375
