@@ -41,6 +41,16 @@ std::string channel_mode_to_string(uint32_t mode)
     return str_mode;
 }
 
+inline void set_channel_mode(uint32_t& mode, uint32_t mask)
+{
+    mode |= mask;
+}
+
+inline void unset_channel_mode(uint32_t& mode, uint32_t mask)
+{
+    mode &= ~mask;
+}
+
 } // namespace
 
 namespace npcp
@@ -56,6 +66,7 @@ IrcServer::IrcServer(EventLoop *loop, const InetAddress &listen_addr, std::strin
     server_.set_message_callback([this] (const TcpConnectionPtr& conn, Buffer* buf) {
         this->on_message(conn, buf);
     });
+    server_.set_thread_num(4);
 }
 
 void IrcServer::start()
@@ -404,6 +415,13 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
 {
     auto args = msg.args();
     const auto nick = conn_session_[conn].nickname;
+
+    if (args.empty())
+    {
+        conn->send(reply::err_needmoreparams(nick, "MODE"));
+        return;
+    }
+
     if (args[0][0] != '#')  // user mode
     {
         const auto mode = args[1];
@@ -447,7 +465,48 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
         {
             conn->send(reply::rpl_channelmodeis(nick, channel, channel_mode_to_string(channels_[channel].mode)));
         }
-        // else
+        else if (args.size() == 2)
+        {
+            const auto &mode = args[1];
+            if (mode[0] != '+' && mode[0] != '-')
+            {
+                conn->send(reply::err_unknownmode(nick, mode[1], channel));
+            }
+            else
+            {
+
+#define PROCESS_MODE(M) \
+    if (mode[0] == '+') \
+    { \
+        set_channel_mode(channels_[channel].mode, kChannelMode_##M); \
+        conn->send(":" + nick + "!" + conn_session_[conn].username + "@jusot.com MODE " + channel + " " + mode + "\r\n"); \
+    } \
+    else if (mode[0] == '-') \
+    { \
+        unset_channel_mode(channels_[channel].mode, kChannelMode_##M); \
+        conn->send(":" + nick + "!" + conn_session_[conn].username + "@jusot.com MODE " + channel + " " + mode + "\r\n"); \
+    }
+
+                switch (mode[1])
+                {
+                    case 'm':
+                        PROCESS_MODE(m);
+                        break;
+
+                    case 't':
+                        PROCESS_MODE(t);
+                        break;
+
+                    case 'v':
+                        break;
+
+                    default:
+                        conn->send(reply::err_unknownmode(nick, mode[1], channel));
+                        break;
+                }
+#undef PROCESS_MODE
+            }
+        }
     }
 }
 

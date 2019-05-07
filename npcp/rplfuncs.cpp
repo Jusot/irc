@@ -430,6 +430,22 @@ std::string err_passwdmismatch(const std::string& nick)
     });
 }
 
+std::string err_unknownmode(const std::string& nick,
+                            char mode,
+                            const std::string& channel)
+{
+    std::string tmp(nick);
+    tmp.push_back(' ');
+    tmp.push_back(mode);
+    return gen_reply({
+        _m_hostname,
+        "472",
+        tmp,
+        ":is unknown mode char to me for",
+        channel
+    });
+}
+
 std::string err_umodeunknownflag(const std::string& nick)
 {
     return gen_reply({
