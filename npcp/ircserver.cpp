@@ -247,7 +247,21 @@ void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
 {
+    int users = 0;
+    int unknowns = 0;
+    for (const auto& pair: conn_session_)
+    {
+        if (pair.second.state == Session::State::REGISTERED)
+            ++users;
+        else
+            ++unknowns;
+    }
 
+    conn->send(reply::rpl_luserclient(users, 1, 1));
+    conn->send(reply::rpl_luserop(0));
+    conn->send(reply::rpl_luserunknown(unknowns));
+    conn->send(reply::rpl_luserchannels(channels_.size()));
+    conn->send(reply::rpl_luserme(users + unknowns, 1));
 }
 
 void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
