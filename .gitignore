@@ -46,6 +46,7 @@ results
 report.html
 report.json
 alltests
+test/log
 
 # Folders
 bin/

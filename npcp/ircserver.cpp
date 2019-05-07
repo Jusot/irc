@@ -58,75 +58,74 @@ void IrcServer::on_connection(const TcpConnectionPtr &conn)
 
 void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 {
-    const char* crlf = buf->findCRLF();
-    if (crlf == nullptr)
-        return;
-    Message msg(buf->retrieve_as_string(crlf - buf->peek() + 2));
-    auto hs = cal_hash(msg.command().c_str());
-
-    switch (hs)
+    while (const char* crlf = buf->findCRLF())
     {
-        case "NICK"_hash:
-            nick_process(conn, msg);
-            break;
+        Message msg(buf->retrieve_as_string(crlf - buf->peek() + 2));
+        auto hs = cal_hash(msg.command().c_str());
 
-        case "USER"_hash:
-            user_process(conn, msg);
-            break;
+        switch (hs)
+        {
+            case "NICK"_hash:
+                nick_process(conn, msg);
+                break;
+
+            case "USER"_hash:
+                user_process(conn, msg);
+                break;
 
 #define RPL_WHEN_NOTREGISTERED \
-    if (!check_registered(conn)) \
-    { \
-        conn->send(reply::err_notregistered()); \
-        break; \
-    }
+            if (!check_registered(conn)) \
+            { \
+                conn->send(reply::err_notregistered(conn_session_.count(conn) ? conn_session_[conn].nickname : "*")); \
+                break; \
+            }
 
-        case "QUIT"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            quit_process(conn, msg);
-            break;
+            case "QUIT"_hash:
+                quit_process(conn, msg);
+                break;
 
-        case "PRIVMSG"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            privmsg_process(conn, msg);
-            break;
+            case "PRIVMSG"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                privmsg_process(conn, msg);
+                break;
 
-        case "NOTICE"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            notice_process(conn, msg);
-            break;
+            case "NOTICE"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                notice_process(conn, msg);
+                break;
 
-        case "PING"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            ping_process(conn, msg);
-            break;
+            case "PING"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                ping_process(conn, msg);
+                break;
 
-        case "PONG"_hash:
-            break;
+            case "PONG"_hash:
+                break;
 
-        case "MOTD"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            motd_process(conn, msg);
-            break;
+            case "MOTD"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                motd_process(conn, msg);
+                break;
 
-        case "LUSERS"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            lusers_process(conn, msg);
-            break;
+            case "LUSERS"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                lusers_process(conn, msg);
+                break;
 
-        case "WHOIS"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            whois_process(conn, msg);
-            break;
+            case "WHOIS"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                whois_process(conn, msg);
+                break;
 
-        case "MODE"_hash:
-            RPL_WHEN_NOTREGISTERED;
-            break;
+            case "MODE"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                break;
 
-        default:
-            if (check_registered(conn))
-                conn->send(reply::err_unknowncommand(msg.command()));
-            break;
+            default:
+                if (check_registered(conn))
+                    conn->send(reply::err_unknowncommand(msg.command()));
+                break;
+        }
     }
 }
 
@@ -157,9 +156,9 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
             session.nickname,
             session.username,
             "jusot.com"));
-        conn->send(reply::rpl_yourhost("2"));
-        conn->send(reply::rpl_created());
-        conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
+        conn->send(reply::rpl_yourhost(nick, "2"));
+        conn->send(reply::rpl_created(session.nickname));
+        conn->send(reply::rpl_myinfo(session.nickname, "2", "ao", "mtov"));
     }
     else
     {
@@ -177,7 +176,7 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
     if (check_registered(conn))
         conn->send(reply::err_alreadyregistered());
     else if (msg.args().size() != 4)
-        conn->send(reply::err_needmoreparams(msg.command()));
+        conn->send(reply::err_needmoreparams(conn_session_.count(conn) ? conn_session_[conn].nickname : "*", msg.command()));
     else if (conn_session_.count(conn) && conn_session_[conn].state == Session::State::NICK)
     {
         auto& session = conn_session_[conn];
@@ -192,13 +191,13 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
             session.nickname,
             session.username,
             "jusot.com"));
-        conn->send(reply::rpl_yourhost("2"));
-        conn->send(reply::rpl_created());
-        conn->send(reply::rpl_myinfo("2", "ao", "mtov"));
+        conn->send(reply::rpl_yourhost(session.nickname, "2"));
+        conn->send(reply::rpl_created(session.nickname));
+        conn->send(reply::rpl_myinfo(session.nickname, "2", "ao", "mtov"));
     }
     else
     {
-        conn_session_[conn] = { Session::State::USER, "", msg.args()[0], msg.args()[3] };
+        conn_session_[conn] = { Session::State::USER, "*", msg.args()[0], msg.args()[3] };
     }
 }
 

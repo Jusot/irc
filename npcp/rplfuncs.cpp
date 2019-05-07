@@ -45,35 +45,41 @@ std::string rpl_welcome(const std::string& nick,
         });
 }
 
-std::string rpl_yourhost(const std::string & ver)
+std::string rpl_yourhost(const std::string & nick,
+    const std::string &ver)
 {
     return gen_reply({
         _m_hostname,
         "002",
+        nick,
         ":Your host is " + _hostname + ", running version " + ver
         });
 }
 
-std::string rpl_created()
+std::string rpl_created(const std::string & nick)
 {
     auto t = std::time(nullptr);
     return gen_reply({
         _m_hostname,
         "003",
+        nick,
         ":This server was created " + std::string(std::ctime(&t))
         });
 }
 
-std::string rpl_myinfo(const std::string & version,
+std::string rpl_myinfo(const std::string & nick,
+    const std::string & version,
     const std::string & avaliable_user_modes,
     const std::string & avaliable_channel_modes)
 {
     return gen_reply({
         _m_hostname,
         "004",
-        _m_hostname,
+        nick,
+        _hostname,
         version,
-        avaliable_user_modes + "\n" + avaliable_channel_modes
+        avaliable_user_modes,
+        avaliable_channel_modes
         });
 }
 
@@ -215,6 +221,7 @@ std::string err_nonicknamegiven()
     return gen_reply({
         _m_hostname,
         "431",
+        "*",
         ":No nickname given"
         });
 }
@@ -229,20 +236,23 @@ std::string err_nicknameinuse(const std::string & nick)
         });
 }
 
-std::string err_notregistered()
+std::string err_notregistered(const std::string & nick)
 {
     return gen_reply({
         _m_hostname,
         "451",
+        nick,
         ":You have not registered"
         });
 }
 
-std::string err_needmoreparams(const std::string & command)
+std::string err_needmoreparams(const std::string & nick,
+    const std::string & command)
 {
     return gen_reply({
         _m_hostname,
         "461",
+        nick,
         command,
         ":Not enough parameters"
         });
