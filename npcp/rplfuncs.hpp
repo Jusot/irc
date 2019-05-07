@@ -16,6 +16,10 @@ std::string rpl_privmsg_or_notice(const std::string& nick,
 std::string rpl_join(const std::string& nick,
     const std::string& user,
     const std::string& channel);
+std::string rpl_part(const std::string& nick,
+    const std::string& user,
+    const std::string& channel,
+    const std::string& message);
 
 std::string rpl_welcome(const std::string &nick,
     const std::string &user, 
@@ -41,6 +45,9 @@ std::string rpl_endofwhois(const std::string& nick);        // 318
 std::string rpl_channelmodeis(const std::string& nick,
                               const std::string& channel,
                               const std::string& mode);     // 324
+std::string rpl_topic(const std::string&nick,
+    const std::string& channel,
+    const std::string& topic);                              // 332
 std::string rpl_namreply(const std::string& nick,
     const std::string& channel,
     const std::vector<std::string>& nicks);                 // 353
@@ -66,6 +73,8 @@ std::string err_unknowncommand(const std::string& nick,
 std::string err_nomotd(const std::string &nick);            // 422
 std::string err_nonicknamegiven();                          // 431
 std::string err_nicknameinuse(const std::string& nick);     // 433
+std::string err_notonchannel(const std::string& nick,
+    const std::string& channel);                            // 442
 std::string err_notregistered(const std::string& nick);     // 451
 std::string err_needmoreparams(const std::string& nick,
     const std::string& command);                            // 461

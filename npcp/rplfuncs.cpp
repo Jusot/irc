@@ -58,6 +58,26 @@ std::string rpl_join(const std::string& nick,
     });
 }
 
+
+std::string rpl_part(const std::string& nick,
+    const std::string& user,
+    const std::string& channel,
+    const std::string& message)
+{
+    if (message.empty()) return gen_reply({
+        ":" + nick + "!" + user + "@jusot.com",
+        "PART",
+        channel
+    });
+    else return gen_reply({
+        ":" + nick + "!" + user + "@jusot.com",
+        "PART",
+        channel,
+        ":" + message
+    });
+}
+
+
 std::string rpl_welcome(const std::string& nick,
     const std::string &user,
     const std::string &host)
@@ -387,6 +407,18 @@ std::string err_nicknameinuse(const std::string & nick)
         nick,
         ":Nickname is already in use"
         });
+}
+
+std::string err_notonchannel(const std::string& nick,
+    const std::string& channel)
+{
+    return gen_reply({
+        _m_hostname,
+        "442",
+        nick,
+        channel,
+        ":You're not on that channel"
+    });
 }
 
 std::string err_notregistered(const std::string & nick)

@@ -38,6 +38,7 @@ class IrcServer
     void oper_process    (const icarus::TcpConnectionPtr&, const Message&);
     void mode_process    (const icarus::TcpConnectionPtr&, const Message&);
     void join_process    (const icarus::TcpConnectionPtr&, const Message&);
+    void part_process    (const icarus::TcpConnectionPtr&, const Message&);
 
     struct Session
     {
