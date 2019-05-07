@@ -9,16 +9,16 @@
 + [x] Connection Registration
 + [x] PING and PONG
 + [x] MOTD
-+ [ ] LUSERS
-+ [ ] WHOIS
++ [x] LUSERS
++ [x] WHOIS
 + [x] ERR_UNKNOWN
-+ [ ] Robustness
++ [x] Robustness
 
 ### Assignment 3
-+ [ ] JOIN
-+ [ ] PRIVMSG and NOTICE to channels
-+ [ ] PART
-+ [ ] TOPIC
++ [x] JOIN
++ [x] PRIVMSG and NOTICE to channels
++ [x] PART
++ [x] TOPIC
 + [ ] User and channel modes
 + [ ] AWAY
 + [ ] NAMES
@@ -29,22 +29,22 @@
 ## TEST
 
 ### Assignment 1
-+ [ ] Basic Connection
++ [x] Basic Connection
 
 ### Assignment 2
-+ [ ] Connection Registration
-+ [ ] PING and PONG
-+ [ ] MOTD
-+ [ ] LUSERS
-+ [ ] WHOIS
-+ [ ] ERR_UNKNOWN
-+ [ ] Robustness
++ [x] Connection Registration
++ [x] PING and PONG
++ [x] MOTD
++ [x] LUSERS
++ [x] WHOIS
++ [x] ERR_UNKNOWN
++ [x] Robustness
 
 ### Assignment 3
-+ [ ] JOIN
-+ [ ] PRIVMSG and NOTICE to channels
-+ [ ] PART
-+ [ ] TOPIC
++ [x] JOIN
++ [x] PRIVMSG and NOTICE to channels
++ [x] PART
++ [x] TOPIC
 + [ ] User and channel modes
 + [ ] AWAY
 + [ ] NAMES

@@ -66,7 +66,7 @@ IrcServer::IrcServer(EventLoop *loop, const InetAddress &listen_addr, std::strin
     server_.set_message_callback([this] (const TcpConnectionPtr& conn, Buffer* buf) {
         this->on_message(conn, buf);
     });
-    server_.set_thread_num(4);
+    server_.set_thread_num(10);
 }
 
 void IrcServer::start()
@@ -536,10 +536,7 @@ void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
         for (const auto &peer : nicks) nick_conn_[peer]->send(replayed_join);
 
         if (!channels_[args[0]].topic.empty())
-        {
             conn->send(reply::rpl_topic(nick, args[0], channels_[args[0]].topic));
-            return;
-        }
 
         conn->send(reply::rpl_namreply(
             nick, 
@@ -592,7 +589,10 @@ void IrcServer::topic_process(const TcpConnectionPtr &conn, const Message &msg)
         {
             auto &chinfo = channels_[channel];
             chinfo.topic = topic;
-            conn->send(reply::rpl_relayed_topic(nick, user, channel, topic));
+            auto rpl = reply::rpl_relayed_topic(nick, user, channel, topic);
+
+            auto &users = channels_[channel].users;
+            for (const auto &peer : users) nick_conn_[peer]->send(rpl);
         }
         else if (channels_[args[0]].topic.empty())
         {
