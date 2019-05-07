@@ -150,7 +150,7 @@ std::string rpl_luserme(const std::string &nick, int clients_cnt, int servers_cn
         _m_hostname,
         "255",
         nick,
-        ":I have " + std::to_string(clients_cnt) + "clients",
+        ":I have " + std::to_string(clients_cnt) + " clients",
         "and " + std::to_string(servers_cnt) + " servers"
         });
 }

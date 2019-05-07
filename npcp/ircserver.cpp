@@ -48,10 +48,15 @@ bool IrcServer::check_registered(const TcpConnectionPtr &conn)
 
 void IrcServer::on_connection(const TcpConnectionPtr &conn)
 {
-    if (!conn->connected() && conn_session_.count(conn))
+    if (conn->connected() && !conn_session_.count(conn))
+    {
+        conn_session_[conn] = { Session::State::NONE, "*", "", "" };
+    }
+    else if (!conn->connected() && conn_session_.count(conn))
     {
         std::lock_guard lock(nick_conn_mutex_);
-        nick_conn_.erase(conn_session_[conn].nickname);
+        if (conn_session_[conn].nickname != "*") 
+            nick_conn_.erase(conn_session_[conn].nickname);
         conn_session_.erase(conn);
     }
 }

@@ -41,6 +41,7 @@ class IrcServer
     {
         enum class State
         {
+            NONE,
             NICK,
             USER,
             REGISTERED
