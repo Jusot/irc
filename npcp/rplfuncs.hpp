@@ -35,6 +35,10 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
 std::string rpl_endofwhois(const std::string& nick);        // 318
+std::string rpl_motd(const std::string& nick,
+    const std::string& line);                               // 372
+std::string rpl_motdstart(const std::string& nick);         // 375
+std::string rpl_endofmotd(const std::string& nick);         // 376
 std::string rpl_youareoper(const std::string& nick);        // 381
 
 std::string err_nosuchnick(const std::string& nick,

@@ -273,12 +273,19 @@ void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
 {
+    const auto nick = conn_session_[conn].nickname;
     if (fs::is_regular_file("./motd.txt"))
     {
         std::ifstream fin("./motd.txt");
-        // ...
+        conn->send(reply::rpl_motdstart(nick));
+
+        std::string line;
+        while (fin >> line) conn->send(reply::rpl_motd(nick, line));
+        if (!fin.eof()) conn->send(reply::rpl_motd(nick, ""));
+        
+        conn->send(reply::rpl_endofmotd(nick));
     }
-    else conn->send(reply::err_nomotd(conn_session_[conn].nickname));
+    else conn->send(reply::err_nomotd(nick));
 }
 
 void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)

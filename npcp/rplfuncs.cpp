@@ -191,6 +191,37 @@ std::string rpl_endofwhois(const std::string& nick)
     });
 }
 
+std::string rpl_motd(const std::string& nick,
+    const std::string& line)
+{
+    return gen_reply({
+        _m_hostname,
+        "372",
+        nick,
+        ":- " + line
+    });
+}
+
+std::string rpl_motdstart(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "375",
+        nick,
+        ":- .* Message of the day - "
+    });
+}
+
+std::string rpl_endofmotd(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "376",
+        nick,
+        ":End of MOTD command"
+    });
+}
+
 std::string rpl_youareoper(const std::string& nick)
 {
     return gen_reply({
