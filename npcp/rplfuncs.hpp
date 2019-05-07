@@ -20,6 +20,10 @@ std::string rpl_part(const std::string& nick,
     const std::string& user,
     const std::string& channel,
     const std::string& message);
+std::string rpl_relayed_topic(const std::string& nick,
+    const std::string& user,
+    const std::string& channel,
+    const std::string& topic);
 
 std::string rpl_welcome(const std::string &nick,
     const std::string &user, 
@@ -45,6 +49,8 @@ std::string rpl_endofwhois(const std::string& nick);        // 318
 std::string rpl_channelmodeis(const std::string& nick,
                               const std::string& channel,
                               const std::string& mode);     // 324
+std::string rpl_notopic(const std::string&nick,
+    const std::string& channel);                            // 331
 std::string rpl_topic(const std::string&nick,
     const std::string& channel,
     const std::string& topic);                              // 332
