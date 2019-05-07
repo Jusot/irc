@@ -30,6 +30,7 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
 std::string rpl_endofwhois(const std::string& nick);        // 318
+std::string rpl_youareoper(const std::string& nick);        // 381
 
 std::string err_nosuchnick(const std::string& nickname);    // 401
 std::string err_norecipient(const std::string& command);    // 411
@@ -42,6 +43,9 @@ std::string err_notregistered(const std::string& nick);     // 451
 std::string err_needmoreparams(const std::string& nick,
     const std::string& command);                            // 461
 std::string err_alreadyregistered();                        // 462
+std::string err_passwdmismatch(const std::string& nick);    // 464
+std::string err_umodeunknownflag(const std::string& nick);  // 501
+std::string err_usersdontmatch(const std::string& nick);    // 502
 } // namespace reply
 } // namespace npcp
 

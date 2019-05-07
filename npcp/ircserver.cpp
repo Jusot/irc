@@ -117,8 +117,14 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
                 whois_process(conn, msg);
                 break;
 
+            case "OPER"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                oper_process(conn, msg);
+                break;
+
             case "MODE"_hash:
                 RPL_WHEN_NOTREGISTERED;
+                mode_process(conn, msg);
                 break;
 
             default:
@@ -298,4 +304,21 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
     }
 
 }
+
+void IrcServer::oper_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+    auto args = msg.args();
+    if (args.size() < 2)
+        conn->send(reply::err_needmoreparams(conn_session_[conn].nickname, "OPER"));
+    else if (args[1] != "foobar") // password is foobar
+        conn->send(reply::err_passwdmismatch(conn_session_[conn].nickname));
+    else
+        conn->send(reply::rpl_youareoper(conn_session_[conn].nickname));
+}
+
+void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
+{
+
+}
+
 } // namespace npcp

@@ -154,6 +154,7 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
         ":" + realname
     });
 }
+
 std::string rpl_whoisserver(const std::string& nick)
 {
     return gen_reply({
@@ -164,6 +165,7 @@ std::string rpl_whoisserver(const std::string& nick)
         ":server info"
     });
 }
+
 std::string rpl_endofwhois(const std::string& nick)
 {
     return gen_reply({
@@ -173,6 +175,17 @@ std::string rpl_endofwhois(const std::string& nick)
         ":End of WHOIS list"
     });
 }
+
+std::string rpl_youareoper(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "381",
+        nick,
+        ":You are now an IRC operator"
+    });
+}
+
 
 std::string err_nosuchnick(const std::string & nickname)
 {
@@ -274,5 +287,36 @@ std::string err_alreadyregistered()
         ":Unauthorized command (already registered)"
         });
 }
+
+std::string err_passwdmismatch(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "464",
+        nick,
+        ":Password incorrect"
+    });
+}
+
+std::string err_umodeunknownflag(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "501",
+        nick,
+        ":Unknown MODE flag"
+    });
+}
+
+std::string err_usersdontmatch(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "502",
+        nick,
+        ":Cannot change mode for other users"
+    });
+}
+
 } // namespace reply
 } // namespace npcp

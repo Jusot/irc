@@ -34,6 +34,8 @@ class IrcServer
     void motd_process    (const icarus::TcpConnectionPtr&, const Message&);
     void lusers_process  (const icarus::TcpConnectionPtr&, const Message&);
     void whois_process   (const icarus::TcpConnectionPtr&, const Message&);
+    void oper_process    (const icarus::TcpConnectionPtr&, const Message&);
+    void mode_process    (const icarus::TcpConnectionPtr&, const Message&);
 
     struct Session
     {
