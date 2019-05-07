@@ -16,7 +16,7 @@ std::string gen_reply(const std::vector<std::string> &args)
     std::string reply;
     for (const auto& arg : args) reply.append(arg + ' ');
     reply.pop_back();
-    return reply + "\r\n";
+    return ((reply.size() > 510) ? reply.substr(0, 510) : reply) + "\r\n";
 }
 } // namespace
 

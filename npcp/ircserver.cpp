@@ -108,6 +108,7 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
                 ping_process(conn, msg);
                 break;
 
+            case ""_hash:
             case "PONG"_hash:
                 break;
 
@@ -282,7 +283,7 @@ void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
         std::string line;
         while (fin >> line) conn->send(reply::rpl_motd(nick, line));
         if (!fin.eof()) conn->send(reply::rpl_motd(nick, ""));
-        
+
         conn->send(reply::rpl_endofmotd(nick));
     }
     else conn->send(reply::err_nomotd(nick));

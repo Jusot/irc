@@ -16,6 +16,10 @@ tests: $(BIN)
 conn: $(BIN)
 	python3 -m pytest tests/chirc/tests/test_connection.py --chirc-exe=$(BIN)
 
+privmsg: $(BIN)
+	python3 -m pytest tests/chirc/tests/test_privmsg.py --chirc-exe=$(BIN)
+
+
 lusers_motd: $(BIN)
 	python3 -m pytest tests/chirc/tests/test_lusers_motd.py --chirc-exe=$(BIN)
 
