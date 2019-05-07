@@ -22,7 +22,7 @@ std::string rpl_welcome(const std::string &nick,
     const std::string &host);                               // 001
 std::string rpl_yourhost(const std::string& nick,
     const std::string &ver);                                // 002
-std::string rpl_created(const std::string& nick);                                  // 003
+std::string rpl_created(const std::string& nick);           // 003
 std::string rpl_myinfo(const std::string& nick,
     const std::string& version,
     const std::string& avaliable_user_modes,
@@ -55,7 +55,9 @@ std::string rpl_youareoper(const std::string& nick);        // 381
 std::string err_nosuchnick(const std::string& nick,
     const std::string& target);                             // 401
 std::string err_nosuchchannel(const std::string& nick,
-                              const std::string& channel)   // 403
+    const std::string& channel);                            // 403
+std::string err_cannotsendtochan(const std::string& nick,
+    const std::string& channel);                            // 404
 std::string err_norecipient(const std::string& nick,
     const std::string& command);                            // 411
 std::string err_notexttosend(const std::string& nick);      // 412

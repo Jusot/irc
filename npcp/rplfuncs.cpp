@@ -288,7 +288,7 @@ std::string rpl_youareoper(const std::string& nick)
 }
 
 
-    std::string err_nosuchnick(const std::string & nick,
+std::string err_nosuchnick(const std::string & nick,
                                const std::string & target)
 {
     return gen_reply({
@@ -312,6 +312,17 @@ std::string err_nosuchchannel(const std::string& nick,
     });
 }
 
+std::string err_cannotsendtochan(const std::string& nick,
+    const std::string& channel)
+{
+    return gen_reply({
+        _m_hostname,
+        "404",
+        nick,
+        channel,
+        ":Cannot send to channel"
+    });
+}
 
 std::string err_norecipient(const std::string & nick,
     const std::string & command)

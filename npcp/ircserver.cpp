@@ -68,6 +68,13 @@ bool IrcServer::check_registered(const TcpConnectionPtr &conn)
     return conn_session_.count(conn) && conn_session_[conn].state == Session::State::REGISTERED;
 }
 
+bool IrcServer::check_in_channel(const TcpConnectionPtr &conn, const std::string &channel)
+{
+    if (!channels_.count(channel)) return false;
+    const auto &nicks = channels_[channel].users;
+    return std::find(nicks.begin(), nicks.end(), conn_session_[conn].nickname) != nicks.end();
+}
+
 void IrcServer::on_connection(const TcpConnectionPtr &conn)
 {
     if (conn->connected() && !conn_session_.count(conn))
@@ -266,28 +273,50 @@ void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::privmsg_process(const TcpConnectionPtr &conn, const Message &msg)
 {
-    if (msg.args().empty())
-        conn->send(reply::err_norecipient(conn_session_[conn].nickname, msg.command()));
-    else if (msg.args().size() == 1)
-        conn->send(reply::err_notexttosend(conn_session_[conn].nickname));
-    else if (!nick_conn_.count(msg.args()[0]))
-        conn->send(reply::err_nosuchnick(conn_session_[conn].nickname, msg.args()[0]));
+    const auto nick = conn_session_[conn].nickname,
+               user = conn_session_[conn].username;
+    const auto args = msg.args();
+
+    if (args.empty())
+        conn->send(reply::err_norecipient(nick, msg.command()));
+    else if (args.size() == 1)
+        conn->send(reply::err_notexttosend(nick));
+    else if (!nick_conn_.count(args[0]) && !channels_.count(args[0]))
+        conn->send(reply::err_nosuchnick(nick, args[0]));
+    else if (nick_conn_.count(args[0]))
+        nick_conn_[args[0]]->send(reply::rpl_privmsg_or_notice(
+            nick, user, true, args[0], args[1]));
+    else if (!check_in_channel(conn, args[0]))
+        conn->send(reply::err_cannotsendtochan(nick, args[0]));
     else
-        nick_conn_[msg.args()[0]]->send(reply::rpl_privmsg_or_notice(conn_session_[conn].nickname,
-        conn_session_[conn].username,
-        true,
-        msg.args()[0], 
-        msg.args()[1]));
+    {
+        const auto &nicks = channels_[args[0]].users;
+        auto rpl = reply::rpl_privmsg_or_notice(
+            nick, user, true, args[0], args[1]);
+        for (const auto &peer : nicks) if (peer != nick)
+            nick_conn_[peer]->send(rpl);
+    }
 }
 
 void IrcServer::notice_process(const TcpConnectionPtr &conn, const Message &msg)
 {
-    if (msg.args().size() >= 2 && nick_conn_.count(msg.args().front()))
-        nick_conn_[msg.args()[0]]->send(reply::rpl_privmsg_or_notice(conn_session_[conn].nickname,
-        conn_session_[conn].username,
-        false,
-        msg.args()[0], 
-        msg.args()[1]));
+    const auto nick = conn_session_[conn].nickname,
+               user = conn_session_[conn].username;
+    const auto args = msg.args();
+
+    if (args.size() < 2) return;
+
+    if (nick_conn_.count(args[0]))
+        nick_conn_[args[0]]->send(reply::rpl_privmsg_or_notice(
+            nick, user, false, args[0], args[1]));
+    else if (check_in_channel(conn, args[0]))
+    {
+        const auto &nicks = channels_[args[0]].users;
+        auto rpl = reply::rpl_privmsg_or_notice(
+            nick, user, true, args[0], args[1]);
+        for (const auto &peer : nicks) if (peer != nick)
+            nick_conn_[peer]->send(rpl);
+    }
 }
 
 void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
@@ -416,9 +445,9 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
         }
         else if (args.size() == 1)
         {
-            conn->send(reply::rpl_channelmodeis(nick, channel, channel_mode_to_string(channel_[channel].mode)));
+            conn->send(reply::rpl_channelmodeis(nick, channel, channel_mode_to_string(channels_[channel].mode)));
         }
-        else
+        // else
     }
 }
 
@@ -429,14 +458,13 @@ void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
     const auto args = msg.args();
 
     if (args.empty()) conn->send(reply::err_needmoreparams(nick, msg.command()));
-    else if (!channels_.count(args[0]) ||
-        std::find(channels_[args[0]].begin(), channels_[args[0]].end(), nick) == channels_[args[0]].end())
+    else if (!channels_.count(args[0]) || !check_in_channel(conn, args[0]))
     {
-        auto &nicks = channels_[args[0]];
+        auto &nicks = channels_[args[0]].users;
         nicks.push_back(nick);
         
         auto replayed_join = reply::rpl_join(nick, user, args[0]);
-        for (const auto &nick : nicks) nick_conn_[nick]->send(replayed_join);
+        for (const auto &peer : nicks) nick_conn_[peer]->send(replayed_join);
 
         conn->send(reply::rpl_namreply(
             nick, 

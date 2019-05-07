@@ -24,6 +24,7 @@ class IrcServer
     void on_message(const icarus::TcpConnectionPtr& conn, icarus::Buffer* buf);
 
     bool check_registered(const icarus::TcpConnectionPtr&);
+    bool check_in_channel(const icarus::TcpConnectionPtr&, const std::string&);
 
     void nick_process    (const icarus::TcpConnectionPtr&, const Message&);
     void user_process    (const icarus::TcpConnectionPtr&, const Message&);
