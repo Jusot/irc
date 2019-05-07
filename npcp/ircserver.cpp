@@ -178,6 +178,16 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
                 join_process(conn, msg);
                 break;
 
+            case "PART"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                part_process(conn, msg);
+                break;
+            
+            case "TOPIC"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                topic_process(conn, msg);
+                break;
+
             default:
                 if (check_registered(conn))
                     conn->send(reply::err_unknowncommand(
@@ -521,15 +531,77 @@ void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
     {
         auto &nicks = channels_[args[0]].users;
         nicks.push_back(nick);
-        
+
         auto replayed_join = reply::rpl_join(nick, user, args[0]);
         for (const auto &peer : nicks) nick_conn_[peer]->send(replayed_join);
+
+        if (!channels_[args[0]].topic.empty())
+        {
+            conn->send(reply::rpl_topic(nick, args[0], channels_[args[0]].topic));
+            return;
+        }
 
         conn->send(reply::rpl_namreply(
             nick, 
             args[0], 
             std::vector<std::string>(nicks.begin(), nicks.end()) ));
         conn->send(reply::rpl_endofnames(nick, args[0]));
+    }
+}
+
+void IrcServer::part_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    const auto nick = conn_session_[conn].nickname, 
+               user = conn_session_[conn].username;
+    const auto args = msg.args();
+
+    if (args.empty()) conn->send(reply::err_needmoreparams(nick, msg.command()));
+    else
+    {
+        const auto channel = args[0],
+                   message = args.size() == 1 ? "" : args[1];
+        if (!channels_.count(channel)) conn->send(reply::err_nosuchchannel(nick, channel));
+        else if (!check_in_channel(conn, channel)) conn->send(reply::err_notonchannel(nick, channel));
+        else
+        {
+            auto rpl = reply::rpl_part(nick, user, channel, message);
+
+            auto &users = channels_[channel].users;
+            for (const auto &peer : users) nick_conn_[peer]->send(rpl);
+
+            auto pos = std::find(users.begin(), users.end(), nick);
+            users.erase(pos);
+            if (users.empty()) channels_.erase(channel);
+        }
+    }
+}
+
+void IrcServer::topic_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    const auto nick = conn_session_[conn].nickname, 
+               user = conn_session_[conn].username;
+    const auto args = msg.args();
+    
+    if (args.empty()) conn->send(reply::err_needmoreparams(nick, msg.command()));
+    else
+    {
+        const auto channel = args[0],
+                   topic   = args.size() == 1 ? "" : args[1];
+        if (!check_in_channel(conn, channel)) conn->send(reply::err_notonchannel(nick, channel));
+        else if (args.size() == 2)
+        {
+            auto &chinfo = channels_[channel];
+            chinfo.topic = topic;
+            conn->send(reply::rpl_relayed_topic(nick, user, channel, topic));
+        }
+        else if (channels_[args[0]].topic.empty())
+        {
+            conn->send(reply::rpl_notopic(nick, args[0]));
+        }
+        else
+        {
+            conn->send(reply::rpl_topic(nick, args[0], channels_[args[0]].topic));
+        }
     }
 }
 
