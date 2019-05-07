@@ -159,6 +159,9 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
         conn->send(reply::rpl_yourhost(nick, "2"));
         conn->send(reply::rpl_created(session.nickname));
         conn->send(reply::rpl_myinfo(session.nickname, "2", "ao", "mtov"));
+
+        lusers_process(conn, msg);
+        motd_process(conn, msg);
     }
     else
     {
@@ -194,6 +197,9 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
         conn->send(reply::rpl_yourhost(session.nickname, "2"));
         conn->send(reply::rpl_created(session.nickname));
         conn->send(reply::rpl_myinfo(session.nickname, "2", "ao", "mtov"));
+
+        lusers_process(conn, msg);
+        motd_process(conn, msg);
     }
     else
     {
@@ -242,7 +248,7 @@ void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
 void IrcServer::motd_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     // check 'motd.txt' exits or not
-    conn->send(reply::err_nomotd());
+    conn->send(reply::err_nomotd(conn_session_[conn].nickname));
 }
 
 void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
@@ -257,11 +263,13 @@ void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
             ++unknowns;
     }
 
-    conn->send(reply::rpl_luserclient(users, 1, 1));
-    conn->send(reply::rpl_luserop(0));
-    conn->send(reply::rpl_luserunknown(unknowns));
-    conn->send(reply::rpl_luserchannels(channels_.size()));
-    conn->send(reply::rpl_luserme(users + unknowns, 1));
+    const auto nick = conn_session_[conn].nickname;
+
+    conn->send(reply::rpl_luserclient(nick, users, 0, 1));
+    conn->send(reply::rpl_luserop(nick, 0));
+    conn->send(reply::rpl_luserunknown(nick, unknowns));
+    conn->send(reply::rpl_luserchannels(nick, channels_.size()));
+    conn->send(reply::rpl_luserme(nick, users + unknowns, 1));
 }
 
 void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)

@@ -83,52 +83,58 @@ std::string rpl_myinfo(const std::string & nick,
         });
 }
 
-std::string rpl_luserclient(int users_cnt, int services_cnt, int servers_cnt)
+std::string rpl_luserclient(const std::string &nick,
+    int users_cnt, int services_cnt, int servers_cnt)
 {
     return gen_reply({
         _m_hostname,
         "251",
+        nick,
         ":There are " + std::to_string(users_cnt) + " users",
         "and " + std::to_string(services_cnt) + " services",
         "on " + std::to_string(servers_cnt) + " servers"
         });
 }
 
-std::string rpl_luserop(int opers_cnt)
+std::string rpl_luserop(const std::string &nick, int opers_cnt)
 {
     return gen_reply({
         _m_hostname,
         "252",
+        nick,
         std::to_string(opers_cnt),
         ":operator(s) online"
         });
 }
 
-std::string rpl_luserunknown(int unknown_connections_cnt)
+std::string rpl_luserunknown(const std::string &nick, int unknown_connections_cnt)
 {
     return gen_reply({
         _m_hostname,
         "253",
+        nick,
         std::to_string(unknown_connections_cnt),
         ":unknown connection(s)"
         });
 }
 
-std::string rpl_luserchannels(int channels_cnt)
+std::string rpl_luserchannels(const std::string &nick, int channels_cnt)
 {
     return gen_reply({
         _m_hostname,
         "254",
+        nick,
         std::to_string(channels_cnt),
         ":channels formed"
         });
 }
 
-std::string rpl_luserme(int clients_cnt, int servers_cnt)
+std::string rpl_luserme(const std::string &nick, int clients_cnt, int servers_cnt)
 {
     return gen_reply({
         _m_hostname,
         "255",
+        nick,
         ":I have " + std::to_string(clients_cnt) + "clients",
         "and " + std::to_string(servers_cnt) + " servers"
         });
@@ -207,11 +213,12 @@ std::string err_unknowncommand(const std::string & command)
         });
 }
 
-std::string err_nomotd()
+std::string err_nomotd(const std::string &nick)
 {
     return gen_reply({
         _m_hostname,
         "422",
+        nick,
         ":MOTD File is missing"
         });
 }
