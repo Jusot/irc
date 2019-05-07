@@ -123,7 +123,10 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
 
             default:
                 if (check_registered(conn))
-                    conn->send(reply::err_unknowncommand(msg.command()));
+                    conn->send(reply::err_unknowncommand(
+                        conn_session_.count(conn) ? conn_session_[conn].nickname : "*",
+                        msg.command())
+                    );
                 break;
         }
     }
@@ -225,19 +228,27 @@ void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 void IrcServer::privmsg_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     if (msg.args().empty())
-        conn->send(reply::err_norecipient(msg.command()));
+        conn->send(reply::err_norecipient(conn_session_[conn].nickname, msg.command()));
     else if (msg.args().size() == 1)
-        conn->send(reply::err_notexttosend());
-    else if (!nick_conn_.count(msg.args().front()))
-        conn->send(reply::err_nosuchnick(msg.args().front()));
+        conn->send(reply::err_notexttosend(conn_session_[conn].nickname));
+    else if (!nick_conn_.count(msg.args()[0]))
+        conn->send(reply::err_nosuchnick(conn_session_[conn].nickname, msg.args()[0]));
     else
-        nick_conn_[msg.args().front()]->send(msg.raw());
+        nick_conn_[msg.args()[0]]->send(reply::rpl_privmsg_or_notice(conn_session_[conn].nickname,
+        conn_session_[conn].username,
+        true,
+        msg.args()[0], 
+        msg.args()[1]));
 }
 
 void IrcServer::notice_process(const TcpConnectionPtr &conn, const Message &msg)
 {
     if (msg.args().size() >= 2 && nick_conn_.count(msg.args().front()))
-        nick_conn_[msg.args().front()]->send(msg.raw());
+        nick_conn_[msg.args()[0]]->send(reply::rpl_privmsg_or_notice(conn_session_[conn].nickname,
+        conn_session_[conn].username,
+        false,
+        msg.args()[0], 
+        msg.args()[1]));
 }
 
 void IrcServer::ping_process(const TcpConnectionPtr &conn, const Message &msg)
@@ -285,7 +296,7 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
 //    const auto& nick = conn_session_[conn].nickname;
     if (nick_conn_.find(nick) == nick_conn_.end())
     {
-        conn->send(reply::err_nosuchnick(nick));
+        conn->send(reply::err_nosuchnick(conn_session_[conn].nickname, nick));
     }
     else
     {
