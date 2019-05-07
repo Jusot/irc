@@ -1,5 +1,6 @@
 #include <string>
 #include <fstream>
+#include <algorithm>
 #include <filesystem>
 
 #include "ircserver.hpp"
@@ -391,18 +392,24 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
 
 void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
 {
-    const auto nick = conn_session_[conn].nickname, user = conn_session_[conn].username;
+    const auto nick = conn_session_[conn].nickname, 
+               user = conn_session_[conn].username;
     const auto args = msg.args();
 
-    if (args.size() != 1) conn->send(reply::err_needmoreparams(nick, msg.command()));
-    else
+    if (args.empty()) conn->send(reply::err_needmoreparams(nick, msg.command()));
+    else if (!channels_.count(args[0]) ||
+        std::find(channels_[args[0]].begin(), channels_[args[0]].end(), nick) == channels_[args[0]].end())
     {
-        channels_[args[0]].push_back(nick);
-        conn->send(reply::rpl_join(nick, user, args[0]));
+        auto &nicks = channels_[args[0]];
+        nicks.push_back(nick);
+        
+        auto replayed_join = reply::rpl_join(nick, user, args[0]);
+        for (const auto &nick : nicks) nick_conn_[nick]->send(replayed_join);
+
         conn->send(reply::rpl_namreply(
             nick, 
             args[0], 
-            std::vector<std::string>(channels_[args[0]].begin(), channels_[args[0]].end()) ));
+            std::vector<std::string>(nicks.begin(), nicks.end()) ));
         conn->send(reply::rpl_endofnames(nick, args[0]));
     }
 }
