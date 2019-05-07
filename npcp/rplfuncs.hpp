@@ -38,6 +38,9 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
 std::string rpl_endofwhois(const std::string& nick);        // 318
+std::string rpl_channelmodeis(const std::string& nick,
+                              const std::string& channel,
+                              const std::string& mode);     // 324
 std::string rpl_namreply(const std::string& nick,
     const std::string& channel,
     const std::vector<std::string>& nicks);                 // 353
@@ -51,6 +54,8 @@ std::string rpl_youareoper(const std::string& nick);        // 381
 
 std::string err_nosuchnick(const std::string& nick,
     const std::string& target);                             // 401
+std::string err_nosuchchannel(const std::string& nick,
+                              const std::string& channel)   // 403
 std::string err_norecipient(const std::string& nick,
     const std::string& command);                            // 411
 std::string err_notexttosend(const std::string& nick);      // 412
@@ -64,6 +69,9 @@ std::string err_needmoreparams(const std::string& nick,
     const std::string& command);                            // 461
 std::string err_alreadyregistered();                        // 462
 std::string err_passwdmismatch(const std::string& nick);    // 464
+std::string err_unknownmode(const std::string& nick,
+                            char mode,
+                            const std::string& channel);    // 472
 std::string err_umodeunknownflag(const std::string& nick);  // 501
 std::string err_usersdontmatch(const std::string& nick);    // 502
 } // namespace reply

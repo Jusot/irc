@@ -52,10 +52,18 @@ class IrcServer
         std::string realname;
     };
 
+    struct ChannelInfo
+    {
+        std::string oper;
+        std::vector<std::string> users;
+        uint32_t mode;
+        std::string topic;
+    };
+
     std::mutex nick_conn_mutex_;
     std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn_;
     std::unordered_map<icarus::TcpConnectionPtr, Session>     conn_session_;
-    std::unordered_map<std::string, std::vector<std::string>> channels_;
+    std::unordered_map<std::string, ChannelInfo>              channels_;
 
     icarus::TcpServer server_;
 };

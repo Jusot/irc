@@ -24,6 +24,23 @@ constexpr std::size_t operator""_hash(const char* str, std::size_t)
 {
     return cal_hash(str);
 }
+
+constexpr uint32_t kChannelMode_m = 0b1;
+constexpr uint32_t kChannelMode_t = 0b10;
+constexpr uint32_t kChannelMode_v = 0x100;
+
+std::string channel_mode_to_string(uint32_t mode)
+{
+    std::string str_mode("+");
+    if (mode & kChannelMode_m)
+        str_mode.push_back('m');
+    if (mode & kChannelMode_t)
+        str_mode.push_back('t');
+    if (mode & kChannelMode_v)
+        str_mode.push_back('v');
+    return str_mode;
+}
+
 } // namespace
 
 namespace npcp
@@ -358,36 +375,51 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
 {
     auto args = msg.args();
     const auto nick = conn_session_[conn].nickname;
-    const auto mode = args[1];
-    if (args[0] != nick)
+    if (args[0][0] != '#')  // user mode
     {
-        conn->send(reply::err_usersdontmatch(nick));
-    }
-    else if (mode[0] != '+' && mode[0] != '-')
-    {
-        conn->send(reply::err_usersdontmatch(nick));
-    }
-    else
-    {
-        switch (mode[1])
+        const auto mode = args[1];
+        if (args[0] != nick)
         {
-            case 'o':
-                if (mode[0] == '-')
-                {
-                    conn->send(":" + nick + " MODE " + nick + " :" + mode + "\r\n");
-                }
-                break;
+            conn->send(reply::err_usersdontmatch(nick));
+        }
+        else if (mode[0] != '+' && mode[0] != '-')
+        {
+            conn->send(reply::err_usersdontmatch(nick));
+        }
+        else
+        {
+            switch (mode[1])
+            {
+                case 'o':
+                    if (mode[0] == '-')
+                    {
+                        conn->send(":" + nick + " MODE " + nick + " :" + mode + "\r\n");
+                    }
+                    break;
 
-            case 'a':
-                break;
+                case 'a':
+                    break;
 
 
-            default:
-                conn->send(reply::err_umodeunknownflag(nick));
-                break;
+                default:
+                    conn->send(reply::err_umodeunknownflag(nick));
+                    break;
+            }
         }
     }
-
+    else  // channel mode
+    {
+        const auto& channel = args[0];
+        if (channels_.find(channel) == channels_.end())
+        {
+            conn->send(reply::err_nosuchchannel(nick, channel));
+        }
+        else if (args.size() == 1)
+        {
+            conn->send(reply::rpl_channelmodeis(nick, channel, channel_mode_to_string(channel_[channel].mode)));
+        }
+        else
+    }
 }
 
 void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)

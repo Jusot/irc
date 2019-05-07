@@ -205,6 +205,19 @@ std::string rpl_endofwhois(const std::string& nick)
     });
 }
 
+std::string rpl_channelmodeis(const std::string& nick,
+                              const std::string& channel,
+                              const std::string& mode)
+{
+    return gen_reply({
+        _m_hostname,
+        "324",
+        nick,
+        channel,
+        mode
+    });
+}
+
 std::string rpl_namreply(const std::string& nick,
     const std::string& channel,
     const std::vector<std::string>& nicks)
@@ -286,6 +299,19 @@ std::string rpl_youareoper(const std::string& nick)
         ":No such nick/channel"
         });
 }
+
+std::string err_nosuchchannel(const std::string& nick,
+                              const std::string& channel)
+{
+    return gen_reply({
+        _m_hostname,
+        "403",
+        nick,
+        channel,
+        ":No such channel"
+    });
+}
+
 
 std::string err_norecipient(const std::string & nick,
     const std::string & command)
