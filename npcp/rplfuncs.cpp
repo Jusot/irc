@@ -27,8 +27,23 @@ namespace reply
 std::string rpl_pong(const std::string& server)
 {
     return gen_reply({
+        _m_hostname,
         "PONG",
         server
+    });
+}
+
+std::string rpl_privmsg_or_notice(const std::string& nick,
+    const std::string& user,
+    bool is_privmsg,
+    const std::string& target,
+    const std::string& msg)
+{
+    return gen_reply({
+        ":" + nick + "!" + user + "@jusot.com",
+        is_privmsg ? "PRIVMSG" : "NOTICE",
+        target,
+        ":" + msg
     });
 }
 
@@ -187,40 +202,47 @@ std::string rpl_youareoper(const std::string& nick)
 }
 
 
-std::string err_nosuchnick(const std::string & nickname)
+    std::string err_nosuchnick(const std::string & nick,
+                               const std::string & target)
 {
     return gen_reply({
         _m_hostname,
         "401",
-        nickname,
+        nick,
+        target,
         ":No such nick/channel"
         });
 }
 
-std::string err_norecipient(const std::string & command)
+std::string err_norecipient(const std::string & nick,
+    const std::string & command)
 {
     return gen_reply({
         _m_hostname,
         "411",
+        nick,
         ":No recipient given",
         "(" + command + ")"
         });
 }
 
-std::string err_notexttosend()
+std::string err_notexttosend(const std::string & nick)
 {
     return gen_reply({
         _m_hostname,
         "412",
+        nick,
         ":No text to send"
         });
 }
 
-std::string err_unknowncommand(const std::string & command)
+std::string err_unknowncommand(const std::string & nick,
+    const std::string & command)
 {
     return gen_reply({
         _m_hostname,
         "421",
+        nick,
         command,
         ":Unknown command"
         });
