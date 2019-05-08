@@ -571,10 +571,17 @@ void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
         if (!channels_[args[0]].topic.empty())
             conn->send(reply::rpl_topic(nick, args[0], channels_[args[0]].topic));
 
+        auto users = chinfo.users;
+        for (auto &user : users)
+        {
+            if (chinfo.operators.count(user))
+                user = "@" + user;
+            if (chinfo.voices.count(user))
+                user = "+" + user;
+        }
+
         conn->send(reply::rpl_namreply(
-            nick, 
-            args[0], 
-            std::vector<std::string>(nicks.begin(), nicks.end()) ));
+            nick, args[0], users ));
         conn->send(reply::rpl_endofnames(nick, args[0]));
     }
 }
@@ -673,11 +680,15 @@ void IrcServer::names_process(const icarus::TcpConnectionPtr &conn, const Messag
             if (!chinfo.users.empty())
             {
                 auto users = chinfo.users;
-                for (auto &user : users) if (chinfo.operators.count(user))
-                    user = "@" + user;
+                for (auto &user : users)
+                {
+                    if (chinfo.operators.count(user))
+                        user = "@" + user;
+                    if (chinfo.voices.count(user))
+                        user = "+" + user;
+                }
                 conn->send(reply::rpl_namreply(
-                    nick, c_chinfo.first, 
-                    std::vector<std::string>(users.begin(), users.end())
+                    nick, c_chinfo.first, users
                 ));
             }
             for (const auto & nickname : chinfo.users)
@@ -692,12 +703,15 @@ void IrcServer::names_process(const icarus::TcpConnectionPtr &conn, const Messag
         const auto channel = msg.args()[0];
         auto &chinfo = channels_[channel];
         auto users = channels_[channel].users;
-        for (auto &user : users) if (chinfo.operators.count(user))
-            user = "@" + user;
+        for (auto &user : users)
+        {
+            if (chinfo.operators.count(user))
+                user = "@" + user;
+            if (chinfo.voices.count(user))
+                user = "+" + user;
+        }
         conn->send(reply::rpl_namreply(
-            nick, 
-            channel, 
-            std::vector<std::string>(users.begin(), users.end()) ));
+            nick, channel, users ));
         conn->send(reply::rpl_endofnames(nick, channel));
     }
     
