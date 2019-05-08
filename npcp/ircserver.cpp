@@ -459,7 +459,7 @@ void IrcServer::lusers_process(const TcpConnectionPtr& conn, const Message& msg)
 
     conn->send(
         reply::rpl_luserclient(nick, users, 0, 1) +
-        reply::rpl_luserop(nick, 0) + 
+        reply::rpl_luserop(nick, operators.size()) + 
         reply::rpl_luserunknown(nick, unknowns) +
         reply::rpl_luserchannels(nick, channels_.size()) +
         reply::rpl_luserme(nick, users + unknowns, 1)
