@@ -51,6 +51,11 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
 std::string rpl_endofwhois(const std::string& nick);        // 318
+std::string rpl_list(const std::string& nick,
+    const std::string& channel,
+    int visable_num, 
+    const std::string& topic);                              // 322
+std::string rpl_listend(const std::string& nick);           // 323
 std::string rpl_channelmodeis(const std::string& nick,
                               const std::string& channel,
                               const std::string& mode);     // 324

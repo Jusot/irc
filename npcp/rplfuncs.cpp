@@ -270,6 +270,31 @@ std::string rpl_endofwhois(const std::string& nick)
     });
 }
 
+std::string rpl_list(const std::string& nick,
+    const std::string& channel,
+    int visable_num, 
+    const std::string& topic)
+{
+    return gen_reply({
+        _m_hostname,
+        "322",
+        nick,
+        channel,
+        std::to_string(visable_num),
+        ":" + topic
+    });
+}
+
+std::string rpl_listend(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "323",
+        nick,
+        ":End of LIST"
+    });
+}
+
 std::string rpl_channelmodeis(const std::string& nick,
                               const std::string& channel,
                               const std::string& mode)

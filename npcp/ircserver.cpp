@@ -200,6 +200,11 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
                 names_process(conn, msg);
                 break;
 
+            case "LIST"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                list_process(conn, msg);
+                break;
+
             default:
                 if (check_registered(conn))
                     conn->send(reply::err_unknowncommand(
@@ -714,7 +719,29 @@ void IrcServer::names_process(const icarus::TcpConnectionPtr &conn, const Messag
             nick, channel, users ));
         conn->send(reply::rpl_endofnames(nick, channel));
     }
-    
+}
+
+void IrcServer::list_process(const icarus::TcpConnectionPtr &conn, const Message &msg)
+{
+    const auto nick = conn_session_[conn].nickname;
+    const auto args = msg.args();
+    if (args.empty())
+    {
+        for (const auto &c_chinfo : channels_)
+        {
+            const auto &chinfo = c_chinfo.second;
+            conn->send(reply::rpl_list(nick, c_chinfo.first, chinfo.users.size(), chinfo.topic));
+        }
+    }
+    else
+    {
+        const auto &channel = args[0];
+        const auto &chinfo = channels_[channel];
+
+        conn->send(reply::rpl_list(nick, channel, chinfo.users.size(), chinfo.topic));
+    }
+    conn->send(reply::rpl_listend(nick));
+
 }
 
 } // namespace npcp
