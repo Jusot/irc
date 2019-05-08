@@ -89,6 +89,10 @@ std::string err_unknowncommand(const std::string& nick,
 std::string err_nomotd(const std::string &nick);            // 422
 std::string err_nonicknamegiven();                          // 431
 std::string err_nicknameinuse(const std::string& nick);     // 433
+std::string err_usernotinchannel(
+        const std::string& nick,
+        const std::string& nick_mode,
+        const std::string& channel);                        // 441
 std::string err_notonchannel(const std::string& nick,
     const std::string& channel);                            // 442
 std::string err_notregistered(const std::string& nick);     // 451

@@ -504,6 +504,21 @@ std::string err_nicknameinuse(const std::string & nick)
         });
 }
 
+std::string err_usernotinchannel(
+        const std::string& nick,
+        const std::string& nick_mode,
+        const std::string& channel)
+{
+    return gen_reply({
+        _m_hostname,
+        "441",
+        nick,
+        nick_mode,
+        channel,
+        ":They aren't on that channel"
+    });
+}
+
 std::string err_notonchannel(const std::string& nick,
     const std::string& channel)
 {

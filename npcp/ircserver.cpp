@@ -553,6 +553,136 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
 #undef PROCESS_MODE
             }
         }
+        else if (args.size() == 3)
+        {
+            const auto& mode = args[1];
+            const auto& nick_mode = args[2];
+            if (mode[0] != '+' && mode[0] != '-')
+            {
+                conn->send(reply::err_unknownmode(nick, mode[1], channel));
+            }
+            else
+            {
+                switch (mode[1])
+                {
+                    case 'v':
+                        if (mode[0] == '+')
+                        {
+                            if (channels_[channel].operators.find(nick) != channels_[channel].operators.end())
+                            {
+                                const auto& users = channels_[channel].users;
+                                if (std::find(users.begin(), users.end(), nick_mode) != users.end())
+                                {
+                                    channels_[channel].voices.insert(nick_mode);
+                                    for (const auto& user: channels_[channel].users)
+                                    {
+                                        std::stringstream reply;
+                                        reply << ":" << nick << "!" << conn_session_[nick_conn_[user]].username
+                                              << "@jusot.com MODE " << channel << " " << mode << " " << nick_mode << "\r\n";
+                                        nick_conn_[user]->send(reply.str());
+                                    }
+                                }
+                                else
+                                {
+                                    conn->send(reply::err_usernotinchannel(nick, nick_mode, channel));
+                                }
+                            }
+                            else
+                            {
+                                conn->send(reply::err_chanoprivsneeded(nick, channel));
+                            }
+                        }
+                        else
+                        {
+                            if (channels_[channel].operators.find(nick) != channels_[channel].operators.end())
+                            {
+                                const auto& users = channels_[channel].users;
+                                if (std::find(users.begin(), users.end(), nick_mode) != users.end())
+                                {
+                                    channels_[channel].voices.erase(nick_mode);
+                                    for (const auto& user: channels_[channel].users)
+                                    {
+                                        std::stringstream reply;
+                                        reply << ":" << nick << "!" << conn_session_[nick_conn_[user]].username
+                                              << "@jusot.com MODE " << channel << " " << mode << " " << nick_mode << "\r\n";
+                                        nick_conn_[user]->send(reply.str());
+                                    }
+                                }
+                                else
+                                {
+                                    conn->send(reply::err_usernotinchannel(nick, nick_mode, channel));
+                                }
+                            }
+                            else
+                            {
+                                conn->send(reply::err_chanoprivsneeded(nick, channel));
+                            }
+                        }
+
+                        break;
+
+
+                    case 'o':
+                        if (mode[0] == '+')
+                        {
+                            if (channels_[channel].operators.find(nick) != channels_[channel].operators.end())
+                            {
+                                const auto& users = channels_[channel].users;
+                                if (std::find(users.begin(), users.end(), nick_mode) != users.end())
+                                {
+                                    channels_[channel].operators.insert(nick_mode);
+                                    for (const auto& user: channels_[channel].users)
+                                    {
+                                        std::stringstream reply;
+                                        reply << ":" << nick << "!" << conn_session_[nick_conn_[user]].username
+                                              << "@jusot.com MODE " << channel << " " << mode << " " << nick_mode << "\r\n";
+                                        nick_conn_[user]->send(reply.str());
+                                    }
+                                }
+                                else
+                                {
+                                    conn->send(reply::err_usernotinchannel(nick, nick_mode, channel));
+                                }
+                            }
+                            else
+                            {
+                                conn->send(reply::err_chanoprivsneeded(nick, channel));
+                            }
+                        }
+                        else
+                        {
+                            if (channels_[channel].operators.find(nick) != channels_[channel].operators.end())
+                            {
+                                const auto& users = channels_[channel].users;
+                                if (std::find(users.begin(), users.end(), nick_mode) != users.end())
+                                {
+                                    channels_[channel].operators.erase(nick_mode);
+                                    for (const auto& user: channels_[channel].users)
+                                    {
+                                        std::stringstream reply;
+                                        reply << ":" << nick << "!" << conn_session_[nick_conn_[user]].username
+                                              << "@jusot.com MODE " << channel << " " << mode << " " << nick_mode << "\r\n";
+                                        nick_conn_[user]->send(reply.str());
+                                    }
+                                }
+                                else
+                                {
+                                    conn->send(reply::err_usernotinchannel(nick, nick_mode, channel));
+                                }
+                            }
+                            else
+                            {
+                                conn->send(reply::err_chanoprivsneeded(nick, channel));
+                            }
+                        }
+                        break;
+
+                    default:
+                        conn->send(reply::err_unknownmode(nick, mode[1], channel));
+                        break;
+                }
+            }
+        }
     }
 }
 
