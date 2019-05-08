@@ -908,7 +908,63 @@ void IrcServer::list_process(const icarus::TcpConnectionPtr &conn, const Message
 
 void IrcServer::who_process(const icarus::TcpConnectionPtr &conn, const Message &msg)
 {
+    const auto nick = conn_session_[conn].nickname;
+    const auto args = msg.args();
+    
+    if (args.empty() || args[0] == "*")
+    {
+        std::set<std::string> nicks;
+        for (const auto &p : nick_conn_) nicks.insert(p.first);
 
+        for (const auto &c_chinfo : channels_)
+        {
+            if (check_in_channel(conn, c_chinfo.first))
+            {
+                const auto &chinfo = c_chinfo.second;
+                for (const auto &peer : chinfo.users) if (nicks.count(peer))
+                    nicks.erase(peer);
+            }
+        }
+
+        for (const auto &peer : nicks)
+        {
+            // if (peer == nick) continue;
+            const auto &session = conn_session_[nick_conn_[peer]];
+        
+            std::string flags;
+            flags += session.state == Session::State::AWAY ? "G" : "H";
+            if (operators.count(session.nickname)) flags += "*";
+
+            conn->send(reply::rpl_whoreply(
+                nick, "*", session.username, "jusot.com", "jusot.com",
+                peer, flags, session.realname));
+        }
+        conn->send(reply::rpl_endofwho(nick, "*"));
+    }
+    else
+    {
+        const auto channel = args[0];
+        if (channels_.count(channel))
+        {
+            const auto &chinfo = channels_[channel];
+            for (const auto &peer : chinfo.users)
+            {
+                // if (peer == nick) continue;
+                const auto &session = conn_session_[nick_conn_[peer]];
+
+                std::string flags;
+                flags += session.state == Session::State::AWAY ? "G" : "H";
+                if (operators.count(session.nickname)) flags += "*";
+                if (chinfo.operators.count(session.nickname)) flags += "@";
+                if (chinfo.voices.count(session.nickname)) flags += "+";
+
+                conn->send(reply::rpl_whoreply(
+                    nick, channel, session.username, "jusot.com", "jusot.com",
+                    peer, flags, session.realname));
+            }
+        }
+        conn->send(reply::rpl_endofwho(nick, channel));
+    }
 }
 
 } // namespace npcp

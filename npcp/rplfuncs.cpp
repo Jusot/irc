@@ -259,13 +259,13 @@ std::string rpl_whoisserver(const std::string& nick)
     });
 }
 
-std::string rpl_endofwho(const std::string& peernick,
+std::string rpl_endofwho(const std::string& nick,
     const std::string& name)
 {
     return gen_reply({
         _m_hostname,
         "315",
-        peernick,
+        nick,
         name,
         ":End of WHO list"
     });
@@ -357,23 +357,24 @@ std::string rpl_topic(const std::string&nick,
     });
 }
 
-std::string rpl_whoreply(const std::string& peernick,
+std::string rpl_whoreply(const std::string& nick,
     const std::string& channel,
     const std::string& user,
     const std::string& host,
     const std::string& server,
-    const std::string& nick,
+    const std::string& peernick,
     const std::string& flags,
     const std::string& realname)
 {
     return gen_reply({
         _m_hostname,
-        peernick,
+        "352",
+        nick,
         channel,
         user,
         host,
         server,
-        nick,
+        peernick,
         flags,
         ":0",
         realname

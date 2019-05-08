@@ -50,7 +50,7 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& user,
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
-std::string rpl_endofwho(const std::string& peernick,
+std::string rpl_endofwho(const std::string& nick,
     const std::string& name);                               // 315
 std::string rpl_endofwhois(const std::string& nick);        // 318
 std::string rpl_whoischannels(const std::string& nick,
@@ -68,12 +68,12 @@ std::string rpl_notopic(const std::string&nick,
 std::string rpl_topic(const std::string&nick,
     const std::string& channel,
     const std::string& topic);                              // 332
-std::string rpl_whoreply(const std::string& peernick,
+std::string rpl_whoreply(const std::string& nick,
     const std::string& channel,
     const std::string& user,
     const std::string& host,
     const std::string& server,
-    const std::string& nick,
+    const std::string& peernick,
     const std::string& flags,
     const std::string& realname);                           // 352
 std::string rpl_namreply(const std::string& nick,
