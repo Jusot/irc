@@ -1,3 +1,4 @@
+#include <set>
 #include <string>
 #include <fstream>
 #include <algorithm>
@@ -192,6 +193,11 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
             case "AWAY"_hash:
                 RPL_WHEN_NOTREGISTERED;
                 away_process(conn, msg);
+                break;
+
+            case "NAMES"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                names_process(conn, msg);
                 break;
 
             default:
@@ -554,7 +560,9 @@ void IrcServer::join_process(const TcpConnectionPtr& conn, const Message& msg)
     if (args.empty()) conn->send(reply::err_needmoreparams(nick, msg.command()));
     else if (!channels_.count(args[0]) || !check_in_channel(conn, args[0]))
     {
-        auto &nicks = channels_[args[0]].users;
+        auto &chinfo = channels_[args[0]];
+        auto &nicks = chinfo.users;
+        if (nicks.empty()) chinfo.operators.insert(nick);
         nicks.push_back(nick);
 
         auto replayed_join = reply::rpl_join(nick, user, args[0]);
@@ -648,6 +656,51 @@ void IrcServer::away_process(const TcpConnectionPtr &conn, const Message &msg)
 
         conn->send(reply::rpl_unaway(session.nickname));
     }
+}
+
+void IrcServer::names_process(const icarus::TcpConnectionPtr &conn, const Message &msg)
+{
+    const auto nick = conn_session_[conn].nickname;
+
+    if (msg.args().empty())
+    {
+        std::set<std::string> allnicks;
+        for (const auto & nick_c : nick_conn_) allnicks.insert(nick_c.first);
+
+        for (const auto & c_chinfo : channels_)
+        {
+            const auto & chinfo = c_chinfo.second;
+            if (!chinfo.users.empty())
+            {
+                auto users = chinfo.users;
+                for (auto &user : users) if (chinfo.operators.count(user))
+                    user = "@" + user;
+                conn->send(reply::rpl_namreply(
+                    nick, c_chinfo.first, 
+                    std::vector<std::string>(users.begin(), users.end())
+                ));
+            }
+            for (const auto & nickname : chinfo.users)
+                if (allnicks.count(nickname)) allnicks.erase(nickname);
+        }
+        if (!allnicks.empty()) conn->send(reply::rpl_namreply(
+            nick, "*", std::vector<std::string>(allnicks.begin(), allnicks.end())
+        ));
+    }
+    else
+    {
+        const auto channel = msg.args()[0];
+        auto &chinfo = channels_[channel];
+        auto users = channels_[channel].users;
+        for (auto &user : users) if (chinfo.operators.count(user))
+            user = "@" + user;
+        conn->send(reply::rpl_namreply(
+            nick, 
+            channel, 
+            std::vector<std::string>(users.begin(), users.end()) ));
+        conn->send(reply::rpl_endofnames(nick, channel));
+    }
+    
 }
 
 } // namespace npcp
