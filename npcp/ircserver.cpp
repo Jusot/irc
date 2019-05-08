@@ -403,16 +403,20 @@ void IrcServer::privmsg_process(const TcpConnectionPtr &conn, const Message &msg
                 nick, user, true, args[0], args[1]));
         }
     }
-    else if (!check_in_channel(conn, args[0]))
-        conn->send(reply::err_cannotsendtochan(nick, args[0]));
-    else
+    else if (check_in_channel(conn, args[0]) || 
+        (channel_mode_m(channels_[args[0]].mode) && channels_[args[0]].voices.count(nick)))
     {
-        const auto &nicks = channels_[args[0]].users;
-        auto rpl = reply::rpl_privmsg_or_notice(
-            nick, user, true, args[0], args[1]);
-        for (const auto &peer : nicks) if (peer != nick)
-            nick_conn_[peer]->send(rpl);
+        const auto &chinfo = channels_[args[0]];
+        if (chinfo.voices.count(nick))
+        {
+            const auto &nicks = channels_[args[0]].users;
+            auto rpl = reply::rpl_privmsg_or_notice(
+                nick, user, true, args[0], args[1]);
+            for (const auto &peer : nicks) if (peer != nick)
+                nick_conn_[peer]->send(rpl);
+        }
     }
+    else conn->send(reply::err_cannotsendtochan(nick, args[0]));
 }
 
 void IrcServer::notice_process(const TcpConnectionPtr &conn, const Message &msg)
