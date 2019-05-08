@@ -255,6 +255,36 @@ void IrcServer::nick_process(const TcpConnectionPtr &conn, const Message &msg)
         lusers_process(conn, msg);
         motd_process(conn, msg);
     }
+    else if (check_registered(conn))
+    {
+        auto &session = conn_session_[conn];
+        const auto newnick = msg.args().front();
+
+        for (auto &c_chinfo : channels_)
+        {
+            auto &chinfo = c_chinfo.second;
+            if (check_in_channel(conn, c_chinfo.first))
+            {
+                for (auto &peer : chinfo.users)
+                {
+                    nick_conn_[peer]->send(reply::rpl_relayed_nick(
+                        session.nickname, session.username,
+                        newnick
+                    ));
+                    if (peer == session.nickname) peer = newnick;
+                }
+            }
+        }
+
+        nick_conn_.erase(session.nickname);
+        nick_conn_[newnick] = conn;
+        session = {
+            session.state,
+            newnick,
+            session.username,
+            session.realname
+        };
+    }
     else
     {
         const auto nick = msg.args().front();

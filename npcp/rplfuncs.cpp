@@ -89,6 +89,17 @@ std::string rpl_relayed_topic(const std::string& nick,
     });
 }
 
+std::string rpl_relayed_nick(const std::string& nick,
+    const std::string& user,
+    const std::string& newnick)
+{
+    return gen_reply({
+        ":" + nick + "!" + user + "@jusot.com",
+        "NICK",
+        ":" + newnick
+    });
+}
+
 
 std::string rpl_welcome(const std::string& nick,
     const std::string &user,
