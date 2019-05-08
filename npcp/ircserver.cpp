@@ -438,11 +438,11 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
         std::string channels;
         for (const auto& pair: channels_)
         {
-            if (check_in_channel(conn, pair.first))
+            if (std::find(pair.second.users.begin(), pair.second.users.end(), nick) != pair.second.users.end())
             {
-                if (pair.second.voices.find(pair.first) != pair.second.voices.end())
+                if (pair.second.voices.find(nick) != pair.second.voices.end())
                     channels.push_back('+');
-                if (pair.second.operators.find(pair.first) != pair.second.operators.end())
+                if (pair.second.operators.find(nick) != pair.second.operators.end())
                     channels.push_back('@');
                 channels.append(pair.first);
                 channels.push_back(' ');
@@ -450,7 +450,6 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
         }
         if (!channels.empty())
         {
-            channels.pop_back();
             conn->send(reply::rpl_whoischannels(nick, channels));
         }
         conn->send(reply::rpl_whoisserver(nick));
