@@ -548,6 +548,18 @@ std::string err_unknownmode(const std::string& nick,
     });
 }
 
+std::string err_chanoprivsneeded(const std::string& nick,
+                                 const std::string& channel)
+{
+    return gen_reply({
+        _m_hostname,
+        "482",
+        nick,
+        channel,
+        ":You're not channel operator"
+    });
+}
+
 std::string err_umodeunknownflag(const std::string& nick)
 {
     return gen_reply({

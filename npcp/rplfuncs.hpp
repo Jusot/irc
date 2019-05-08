@@ -94,6 +94,8 @@ std::string err_passwdmismatch(const std::string& nick);    // 464
 std::string err_unknownmode(const std::string& nick,
                             char mode,
                             const std::string& channel);    // 472
+std::string err_chanoprivsneeded(const std::string& nick,
+                             const std::string& channel);   // 482
 std::string err_umodeunknownflag(const std::string& nick);  // 501
 std::string err_usersdontmatch(const std::string& nick);    // 502
 } // namespace reply

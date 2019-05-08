@@ -504,7 +504,17 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
     if (mode[0] == '+') \
     { \
         set_channel_mode(channels_[channel].mode, kChannelMode_##M); \
-        conn->send(":" + nick + "!" + conn_session_[conn].username + "@jusot.com MODE " + channel + " " + mode + "\r\n"); \
+        if (channels_[channel].operators.find(nick) != channels_[channel].operators.end()) \
+        { \
+            for (const auto& user: channels_[channel].users) \
+            { \
+                nick_conn_[user]->send(":" + nick + "!" + conn_session_[nick_conn_[user]].username + "@jusot.com MODE " + channel + " " + mode + "\r\n"); \
+            } \
+        } \
+        else \
+        { \
+            conn->send(reply::err_chanoprivsneeded(nick, channel)); \
+        } \
     } \
     else if (mode[0] == '-') \
     { \
@@ -522,8 +532,8 @@ void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)
                         PROCESS_MODE(t);
                         break;
 
-                    case 'v':
-                        break;
+//                    case 'v':
+//                        break;
 
                     default:
                         conn->send(reply::err_unknownmode(nick, mode[1], channel));

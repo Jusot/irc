@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <unordered_map>
 
 #include "../icarus/icarus/tcpserver.hpp"
@@ -61,9 +62,10 @@ class IrcServer
     struct ChannelInfo
     {
         ChannelInfo() : mode(0) { }
-        std::string oper;
+        std::set<std::string> operators;
         std::vector<std::string> users;
         uint32_t mode;
+        std::set<std::string> voices;
         std::string topic;
     };
 
