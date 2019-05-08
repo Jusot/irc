@@ -19,12 +19,12 @@
 + [x] PRIVMSG and NOTICE to channels
 + [x] PART
 + [x] TOPIC
-+ [ ] User and channel modes
++ [x] User and channel modes
 + [x] AWAY
 + [x] NAMES
 + [x] LIST
-+ [ ] WHO
-+ [ ] Update Assignment 2
++ [x] WHO
++ [x] Update Assignment 2
 
 ## TEST
 
@@ -49,5 +49,5 @@
 + [x] AWAY
 + [x] NAMES
 + [x] LIST
-+ [ ] WHO
-+ [ ] Update Assignment 2
++ [x] WHO
++ [x] Update Assignment 2
