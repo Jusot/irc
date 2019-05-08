@@ -205,6 +205,11 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
                 list_process(conn, msg);
                 break;
 
+            case "WHO"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                who_process(conn, msg);
+                break;
+
             default:
                 if (check_registered(conn))
                     conn->send(reply::err_unknowncommand(
@@ -832,6 +837,8 @@ void IrcServer::names_process(const icarus::TcpConnectionPtr &conn, const Messag
         if (!allnicks.empty()) conn->send(reply::rpl_namreply(
             nick, "*", std::vector<std::string>(allnicks.begin(), allnicks.end())
         ));
+        
+        conn->send(reply::rpl_endofnames(nick, "*"));
     }
     else
     {
@@ -871,6 +878,10 @@ void IrcServer::list_process(const icarus::TcpConnectionPtr &conn, const Message
         conn->send(reply::rpl_list(nick, channel, chinfo.users.size(), chinfo.topic));
     }
     conn->send(reply::rpl_listend(nick));
+}
+
+void IrcServer::who_process(const icarus::TcpConnectionPtr &conn, const Message &msg)
+{
 
 }
 

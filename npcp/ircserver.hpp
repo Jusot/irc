@@ -44,6 +44,7 @@ class IrcServer
     void away_process    (const icarus::TcpConnectionPtr&, const Message&);
     void names_process   (const icarus::TcpConnectionPtr&, const Message&);
     void list_process    (const icarus::TcpConnectionPtr&, const Message&);
+    void who_process     (const icarus::TcpConnectionPtr&, const Message&);
 
     struct Session
     {

@@ -259,6 +259,18 @@ std::string rpl_whoisserver(const std::string& nick)
     });
 }
 
+std::string rpl_endofwho(const std::string& peernick,
+    const std::string& name)
+{
+    return gen_reply({
+        _m_hostname,
+        "315",
+        peernick,
+        name,
+        ":End of WHO list"
+    });
+}
+
 std::string rpl_endofwhois(const std::string& nick)
 {
     return gen_reply({
@@ -333,6 +345,29 @@ std::string rpl_topic(const std::string&nick,
     });
 }
 
+std::string rpl_whoreply(const std::string& peernick,
+    const std::string& channel,
+    const std::string& user,
+    const std::string& host,
+    const std::string& server,
+    const std::string& nick,
+    const std::string& flags,
+    const std::string& realname)
+{
+    return gen_reply({
+        _m_hostname,
+        peernick,
+        channel,
+        user,
+        host,
+        server,
+        nick,
+        flags,
+        ":0",
+        realname
+    });
+}
+
 std::string rpl_namreply(const std::string& nick,
     const std::string& channel,
     const std::vector<std::string>& nicks)
@@ -341,7 +376,15 @@ std::string rpl_namreply(const std::string& nick,
     for (const auto &nick : nicks) tailing += nick + " ";
     tailing.pop_back();
 
-    return gen_reply({
+    if (channel == "*") return gen_reply({
+        _m_hostname,
+        "353",
+        nick,
+        channel,
+        channel,
+        tailing
+    });
+    else return gen_reply({
         _m_hostname,
         "353",
         nick, "=", channel,

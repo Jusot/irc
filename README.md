@@ -20,9 +20,9 @@
 + [x] PART
 + [x] TOPIC
 + [ ] User and channel modes
-+ [ ] AWAY
-+ [ ] NAMES
-+ [ ] LIST
++ [x] AWAY
++ [x] NAMES
++ [x] LIST
 + [ ] WHO
 + [ ] Update Assignment 2
 
@@ -46,8 +46,8 @@
 + [x] PART
 + [x] TOPIC
 + [ ] User and channel modes
-+ [ ] AWAY
-+ [ ] NAMES
-+ [ ] LIST
++ [x] AWAY
++ [x] NAMES
++ [x] LIST
 + [ ] WHO
 + [ ] Update Assignment 2
