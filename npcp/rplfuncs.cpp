@@ -281,6 +281,18 @@ std::string rpl_whoisserver(const std::string& nick)
     });
 }
 
+std::string rpl_whoisoperator(const std::string& nick, const std::string& peer)
+{
+    return gen_reply({
+        _m_hostname,
+        "313",
+        nick,
+        peer,
+        ":is an IRC operator"
+    });
+}
+
+
 std::string rpl_endofwho(const std::string& nick,
     const std::string& name)
 {

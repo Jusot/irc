@@ -472,27 +472,28 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
     if (args.size() != 1)
         return;
 
-    std::string nick = args[0];
+    const std::string nick = conn_session_[conn].nickname;
+    const std::string peer = args[0];
 
 //    const auto& nick = conn_session_[conn].nickname;
-    if (nick_conn_.find(nick) == nick_conn_.end())
+    if (nick_conn_.find(peer) == nick_conn_.end())
     {
-        conn->send(reply::err_nosuchnick(conn_session_[conn].nickname, nick));
+        conn->send(reply::err_nosuchnick(conn_session_[conn].nickname, peer));
     }
     else
     {
-        auto session = conn_session_[nick_conn_[nick]];
+        auto session = conn_session_[nick_conn_[peer]];
         std::string user = session.username;
         std::string realname = session.realname;
-        conn->send(reply::rpl_whoisuser(nick, user, realname));
+        conn->send(reply::rpl_whoisuser(peer, user, realname));
         std::string channels;
         for (const auto& pair: channels_)
         {
-            if (std::find(pair.second.users.begin(), pair.second.users.end(), nick) != pair.second.users.end())
+            if (std::find(pair.second.users.begin(), pair.second.users.end(), peer) != pair.second.users.end())
             {
-                if (pair.second.voices.find(nick) != pair.second.voices.end())
+                if (pair.second.voices.find(peer) != pair.second.voices.end())
                     channels.push_back('+');
-                if (pair.second.operators.find(nick) != pair.second.operators.end())
+                if (pair.second.operators.find(peer) != pair.second.operators.end())
                     channels.push_back('@');
                 channels.append(pair.first);
                 channels.push_back(' ');
@@ -500,10 +501,18 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
         }
         if (!channels.empty())
         {
-            conn->send(reply::rpl_whoischannels(nick, channels));
+            conn->send(reply::rpl_whoischannels(peer, channels));
         }
-        conn->send(reply::rpl_whoisserver(nick));
-        conn->send(reply::rpl_endofwhois(nick));
+        conn->send(reply::rpl_whoisserver(peer));
+        if (conn_session_[nick_conn_[peer]].state == Session::State::AWAY)
+        {
+            conn->send(reply::rpl_away(nick, peer, "I'm away"));
+        }
+        if (operators.find(peer) != operators.end())
+        {
+            conn->send(reply::rpl_whoisoperator(nick, peer));
+        }
+        conn->send(reply::rpl_endofwhois(peer));
     }
 
 }

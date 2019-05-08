@@ -56,6 +56,8 @@ std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& user,
                           const std::string& realname);
 std::string rpl_whoisserver(const std::string& nick);       // 312
+std::string rpl_whoisoperator(const std::string& nick,
+                              const std::string& peer);     // 313
 std::string rpl_endofwho(const std::string& nick,
     const std::string& name);                               // 315
 std::string rpl_endofwhois(const std::string& nick);        // 318
