@@ -52,6 +52,21 @@ inline void unset_channel_mode(uint32_t& mode, uint32_t mask)
     mode &= ~mask;
 }
 
+inline bool channel_mode_m(uint32_t mode)
+{
+    return mode & kChannelMode_m;
+}
+
+inline bool channel_mode_v(uint32_t mode)
+{
+    return mode & kChannelMode_v;
+}
+
+inline bool channel_mode_t(uint32_t mode)
+{
+    return mode & kChannelMode_t;
+}
+
 } // namespace
 
 namespace npcp
