@@ -198,6 +198,39 @@ std::string rpl_luserme(const std::string &nick, int clients_cnt, int servers_cn
         });
 }
 
+std::string rpl_away(const std::string& nick,
+    const std::string& peer,
+    const std::string& awaymsg)
+{
+    return gen_reply({
+        _m_hostname,
+        "301",
+        nick,
+        peer,
+        ":" + awaymsg
+    });
+}
+
+std::string rpl_unaway(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "305",
+        nick,
+        ":You are no longer marked as being away"
+    });
+}
+
+std::string rpl_nowaway(const std::string& nick)
+{
+    return gen_reply({
+        _m_hostname,
+        "306",
+        nick,
+        ":You have been marked as being away"
+    });
+}
+
 std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& user,
                           const std::string& realname)

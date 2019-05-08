@@ -31,6 +31,9 @@ robustness: $(BIN)
 channel: $(BIN)
 	python3 -m pytest tests/chirc/tests/test_channel.py --chirc-exe=$(BIN)
 
+modes: $(BIN)
+	python3 -m pytest tests/chirc/tests/test_modes.py --chirc-exe=$(BIN)
+
 grade: 
 	@test -s tests/report.json || { echo; echo "Test report file (tests/report.json) does not exist."; echo "Cannot generate grade without it. Make sure you run the tests first."; echo; exit 1; }
 	python3 tests/grade.py --tests-file ./alltests --report-file tests/report.json

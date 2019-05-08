@@ -41,6 +41,11 @@ std::string rpl_luserop(const std::string& nick, int);      // 252
 std::string rpl_luserunknown(const std::string& nick, int); // 253
 std::string rpl_luserchannels(const std::string& nick, int);// 254
 std::string rpl_luserme(const std::string& nick, int, int); // 255
+std::string rpl_away(const std::string& nick,
+    const std::string& peer,
+    const std::string& awaymsg);                            // 301
+std::string rpl_unaway(const std::string& nick);            // 305
+std::string rpl_nowaway(const std::string& nick);           // 306
 std::string rpl_whoisuser(const std::string& nick,          // 311
                           const std::string& user,
                           const std::string& realname);

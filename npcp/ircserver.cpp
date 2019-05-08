@@ -76,7 +76,8 @@ void IrcServer::start()
 
 bool IrcServer::check_registered(const TcpConnectionPtr &conn)
 {
-    return conn_session_.count(conn) && conn_session_[conn].state == Session::State::REGISTERED;
+    return conn_session_.count(conn) &&
+        (conn_session_[conn].state == Session::State::REGISTERED || conn_session_[conn].state == Session::State::AWAY);
 }
 
 bool IrcServer::check_in_channel(const TcpConnectionPtr &conn, const std::string &channel)
@@ -186,6 +187,11 @@ void IrcServer::on_message(const TcpConnectionPtr &conn, Buffer *buf)
             case "TOPIC"_hash:
                 RPL_WHEN_NOTREGISTERED;
                 topic_process(conn, msg);
+                break;
+
+            case "AWAY"_hash:
+                RPL_WHEN_NOTREGISTERED;
+                away_process(conn, msg);
                 break;
 
             default:
@@ -305,8 +311,17 @@ void IrcServer::privmsg_process(const TcpConnectionPtr &conn, const Message &msg
     else if (!nick_conn_.count(args[0]) && !channels_.count(args[0]))
         conn->send(reply::err_nosuchnick(nick, args[0]));
     else if (nick_conn_.count(args[0]))
-        nick_conn_[args[0]]->send(reply::rpl_privmsg_or_notice(
-            nick, user, true, args[0], args[1]));
+    {
+        if (conn_session_[nick_conn_[args[0]]].state == Session::State::AWAY)
+        {
+            conn->send(reply::rpl_away(nick, args[0], nick_awaymsg_[args[0]]));
+        }
+        else
+        {
+            nick_conn_[args[0]]->send(reply::rpl_privmsg_or_notice(
+                nick, user, true, args[0], args[1]));
+        }
+    }
     else if (!check_in_channel(conn, args[0]))
         conn->send(reply::err_cannotsendtochan(nick, args[0]));
     else
@@ -602,6 +617,26 @@ void IrcServer::topic_process(const TcpConnectionPtr &conn, const Message &msg)
         {
             conn->send(reply::rpl_topic(nick, args[0], channels_[args[0]].topic));
         }
+    }
+}
+
+void IrcServer::away_process(const TcpConnectionPtr &conn, const Message &msg)
+{
+    auto &session = conn_session_[conn];
+
+    if (!msg.args().empty())
+    {
+        session.state = Session::State::AWAY;
+        nick_awaymsg_[session.nickname] = msg.args()[0];
+
+        conn->send(reply::rpl_nowaway(session.nickname));
+    }
+    else
+    {
+        session.state = Session::State::REGISTERED;
+        nick_awaymsg_.erase(session.nickname);
+
+        conn->send(reply::rpl_unaway(session.nickname));
     }
 }
 

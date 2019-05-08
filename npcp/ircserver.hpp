@@ -40,6 +40,7 @@ class IrcServer
     void join_process    (const icarus::TcpConnectionPtr&, const Message&);
     void part_process    (const icarus::TcpConnectionPtr&, const Message&);
     void topic_process   (const icarus::TcpConnectionPtr&, const Message&);
+    void away_process    (const icarus::TcpConnectionPtr&, const Message&);
 
     struct Session
     {
@@ -48,12 +49,14 @@ class IrcServer
             NONE,
             NICK,
             USER,
-            REGISTERED
+            REGISTERED,
+            AWAY
         } state;
         std::string nickname;
         std::string username;
         std::string realname;
     };
+    std::unordered_map<std::string, std::string> nick_awaymsg_;
 
     struct ChannelInfo
     {
