@@ -100,6 +100,17 @@ std::string rpl_relayed_nick(const std::string& nick,
     });
 }
 
+std::string rpl_relayed_quit(const std::string& nick,
+    const std::string& user,
+    const std::string& message)
+{
+    return gen_reply({
+        ":" + nick + "!" + user + "@jusot.com",
+        "QUIT",
+        ":" + message
+    });
+}
+
 
 std::string rpl_welcome(const std::string& nick,
     const std::string &user,

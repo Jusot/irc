@@ -27,6 +27,9 @@ std::string rpl_relayed_topic(const std::string& nick,
 std::string rpl_relayed_nick(const std::string& nick,
     const std::string& user,
     const std::string& newnick);
+std::string rpl_relayed_quit(const std::string& nick,
+    const std::string& user,
+    const std::string& message);
 
 std::string rpl_welcome(const std::string &nick,
     const std::string &user, 

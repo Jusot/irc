@@ -331,14 +331,34 @@ void IrcServer::user_process(const TcpConnectionPtr &conn, const Message &msg)
 
 void IrcServer::quit_process(const TcpConnectionPtr &conn, const Message &msg)
 {
+    const auto nick = conn_session_[conn].nickname,
+               user = conn_session_[conn].username;
+    const auto args = msg.args();
+    
+    std::string quit_message = msg.args().empty() ? "Client Quit" : msg.args().front();
+    
+    auto rpl = reply::rpl_relayed_quit(nick, user, quit_message);
+    for (auto &c_chinfo : channels_)
+    {
+        auto &chinfo = c_chinfo.second;
+        if (check_in_channel(conn, c_chinfo.first))
+        {
+            for (auto &peer : chinfo.users)
+            {
+                if (peer == nick) continue;
+                nick_conn_[peer]->send(rpl);
+            }
+        }
+    }
+
+    conn->send(":jusot.com ERROR :Closing Link: jusot.com (" + quit_message + ")\r\n");
+    
     {
         std::lock_guard lock(nick_conn_mutex_);
         nick_conn_.erase(conn_session_[conn].nickname);
         conn_session_.erase(conn);
     }
 
-    std::string quit_message = msg.args().empty() ? "Client Quit" : msg.args().front();
-    conn->send(":jusot.com ERROR :Closing Link: jusot.com (" + quit_message + ")\r\n");
     conn->get_loop()->queue_in_loop([conn] () {
         conn->shutdown();
     });
