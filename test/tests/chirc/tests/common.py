@@ -14,7 +14,7 @@ import time
 
 class IRCSession():
     
-    def __init__(self, chirc_exe = None, msg_timeout = 0.1, randomize_ports = False, 
+    def __init__(self, chirc_exe = None, msg_timeout = 1, randomize_ports = False, 
                  default_port = None, loglevel = -1, debug = False):
         if chirc_exe is None:
             self.chirc_exe = "../chirc"

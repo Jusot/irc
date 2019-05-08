@@ -843,17 +843,20 @@ void IrcServer::names_process(const icarus::TcpConnectionPtr &conn, const Messag
     else
     {
         const auto channel = msg.args()[0];
-        auto &chinfo = channels_[channel];
-        auto users = channels_[channel].users;
-        for (auto &user : users)
+        if (channels_.count(channel))
         {
-            if (chinfo.operators.count(user))
-                user = "@" + user;
-            if (chinfo.voices.count(user))
-                user = "+" + user;
+            auto &chinfo = channels_[channel];
+            auto users = channels_[channel].users;
+            for (auto &user : users)
+            {
+                if (chinfo.operators.count(user))
+                    user = "@" + user;
+                if (chinfo.voices.count(user))
+                    user = "+" + user;
+            }
+            conn->send(reply::rpl_namreply(
+                nick, channel, users ));
         }
-        conn->send(reply::rpl_namreply(
-            nick, channel, users ));
         conn->send(reply::rpl_endofnames(nick, channel));
     }
 }
