@@ -73,6 +73,7 @@ class IrcServer
     };
 
     std::mutex nick_conn_mutex_;
+    std::set<std::string> operators;
     std::unordered_map<std::string, icarus::TcpConnectionPtr> nick_conn_;
     std::unordered_map<icarus::TcpConnectionPtr, Session>     conn_session_;
     std::unordered_map<std::string, ChannelInfo>              channels_;

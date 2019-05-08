@@ -435,6 +435,24 @@ void IrcServer::whois_process(const TcpConnectionPtr& conn, const Message& msg)
         std::string user = session.username;
         std::string realname = session.realname;
         conn->send(reply::rpl_whoisuser(nick, user, realname));
+        std::string channels;
+        for (const auto& pair: channels_)
+        {
+            if (check_in_channel(conn, pair.first))
+            {
+                if (pair.second.voices.find(pair.first) != pair.second.voices.end())
+                    channels.push_back('+');
+                if (pair.second.operators.find(pair.first) != pair.second.operators.end())
+                    channels.push_back('@');
+                channels.append(pair.first);
+                channels.push_back(' ');
+            }
+        }
+        if (!channels.empty())
+        {
+            channels.pop_back();
+            conn->send(reply::rpl_whoischannels(nick, channels));
+        }
         conn->send(reply::rpl_whoisserver(nick));
         conn->send(reply::rpl_endofwhois(nick));
     }
@@ -447,9 +465,14 @@ void IrcServer::oper_process(const TcpConnectionPtr& conn, const Message& msg)
     if (args.size() < 2)
         conn->send(reply::err_needmoreparams(conn_session_[conn].nickname, "OPER"));
     else if (args[1] != "foobar") // password is foobar
+    {
         conn->send(reply::err_passwdmismatch(conn_session_[conn].nickname));
+    }
     else
+    {
+        operators.insert(args[0]);
         conn->send(reply::rpl_youareoper(conn_session_[conn].nickname));
+    }
 }
 
 void IrcServer::mode_process(const TcpConnectionPtr& conn, const Message& msg)

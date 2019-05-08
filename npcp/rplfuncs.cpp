@@ -282,6 +282,18 @@ std::string rpl_endofwhois(const std::string& nick)
     });
 }
 
+std::string rpl_whoischannels(const std::string& nick,
+                              const std::string& channels)
+{
+    return gen_reply({
+        _m_hostname,
+        "319",
+        nick,
+        nick,
+        ":" + channels
+    });
+}
+
 std::string rpl_list(const std::string& nick,
     const std::string& channel,
     int visable_num, 

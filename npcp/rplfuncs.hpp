@@ -53,6 +53,8 @@ std::string rpl_whoisserver(const std::string& nick);       // 312
 std::string rpl_endofwho(const std::string& peernick,
     const std::string& name);                               // 315
 std::string rpl_endofwhois(const std::string& nick);        // 318
+std::string rpl_whoischannels(const std::string& nick,
+                              const std::string& channels);  // 319
 std::string rpl_list(const std::string& nick,
     const std::string& channel,
     int visable_num, 
