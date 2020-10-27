@@ -1,4 +1,4 @@
-# Network Programming Course Project
+# IRC
 
 ## TODO
 
